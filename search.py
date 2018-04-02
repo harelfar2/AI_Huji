@@ -3,6 +3,7 @@ In search.py, you will implement generic search algorithms
 """
 
 import util
+from queue import PriorityQueue
 
 
 class SearchProblem:
@@ -65,25 +66,14 @@ def depth_first_search(problem):
     print("Is the start a goal?", problem.is_goal_state(problem.get_start_state()))
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
-    fridge = []
-    state = problem.get_start_state()
-    fridge.append(state)
-
-    while fridge:
-        state = fridge.pop()
-        if not problem.is_goal_state(state):
-            next_states = problem.get_successors(state)
-            for state in next_states:
-                print(state[0])
-                fridge.append(state[0])
-
+    "*** YOUR CODE HERE ***"
+    util.raiseNotDefined()
 
 def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pass
 
 
 def uniform_cost_search(problem):
