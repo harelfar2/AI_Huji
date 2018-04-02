@@ -61,16 +61,21 @@ def depth_first_search(problem):
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
 
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    print("Start:", problem.get_start_state())
+    print("Is the start a goal?", problem.is_goal_state(problem.get_start_state()))
+    print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
-    print("hello Yoh")
-    print("Start:", problem.getStartState())
+    fridge = []
+    state = problem.get_start_state()
+    fridge.append(state)
 
-
-
-
+    while fridge:
+        state = fridge.pop()
+        if not problem.is_goal_state(state):
+            next_states = problem.get_successors(state)
+            for state in next_states:
+                print(state[0])
+                fridge.append(state[0])
 
 
 def breadth_first_search(problem):
