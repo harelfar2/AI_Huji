@@ -52,7 +52,7 @@ class SearchProblem:
 
 
 
-def depth_first_search(problem):
+def depth_first_search(problem): #todo Add list of seen nodes?
     """
     Search the deepest nodes in the search tree first.
 
@@ -66,14 +66,35 @@ def depth_first_search(problem):
     print("Is the start a goal?", problem.is_goal_state(problem.get_start_state()))
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    fringe =[]
+    seen = {}
+
+    for L_succ in problem.get_successors(problem.get_start_state()):
+        fringe.append((L_succ, []))
+
+    while fringe:
+        L_state, path= fringe.pop()
+        board = L_state[0]
+        move = L_state[1]
+
+        path = path + [move] # add the move object to the path
+
+        if problem.is_goal_state(board):
+            return path
+
+        successors = problem.get_successors(board)
+        for L_succ in successors:
+            fringe.append((L_succ, path))
+
+    return None
 
 def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
-    pass
+    "*** YOUR CODE HERE ***"
+    util.raiseNotDefined()
 
 
 def uniform_cost_search(problem):
