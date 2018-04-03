@@ -57,7 +57,7 @@ class BlokusFillProblem(SearchProblem):
 class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
         self.expanded = 0
-        "*** YOUR CODE HERE ***"
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
         """
@@ -66,8 +66,14 @@ class BlokusCornersProblem(SearchProblem):
         return self.board
 
     def is_goal_state(self, state):
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return state.get_position(0, 0) != -1 and \
+               state.get_position(state.board_w - 1, 0) != -1 and \
+               state.get_position(0, state.board_h - 1) != -1 and \
+               state.get_position(state.board_w - 1, state.board_h - 1) != -1
+
+
+
+
 
     def get_successors(self, state):
         """

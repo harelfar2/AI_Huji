@@ -52,7 +52,7 @@ class SearchProblem:
 
 
 
-def depth_first_search(problem): #todo Add list of seen nodes?
+def depth_first_search(problem):
     """
     Search the deepest nodes in the search tree first.
 
@@ -68,7 +68,7 @@ def depth_first_search(problem): #todo Add list of seen nodes?
     """
 
     fringe =[]
-    seen = {}
+    seen = []
 
     for L_succ in problem.get_successors(problem.get_start_state()):
         fringe.append((L_succ, []))
@@ -79,13 +79,15 @@ def depth_first_search(problem): #todo Add list of seen nodes?
         move = L_state[1]
 
         path = path + [move] # add the move object to the path
+        seen = seen + [board]
 
         if problem.is_goal_state(board):
             return path
 
         successors = problem.get_successors(board)
         for L_succ in successors:
-            fringe.append((L_succ, path))
+            if L_succ[0] not in seen:
+                fringe.append((L_succ, path))
 
     return None
 
@@ -117,8 +119,7 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return problem.is_goal_state(problem.get_start_state())
 
 
 

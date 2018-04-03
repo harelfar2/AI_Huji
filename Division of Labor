@@ -1,0 +1,13 @@
+Harel:
+ Breadth first search (1 points)
+ Uniform cost search (2 points)
+ BlokusCoverProblem (2 points)
+
+Yoni:
++Depth first search (2 points)
++BlokusCornersProblem (2 points)
+ A* search (3 points)
+
+Together:
+ Blokus Corners Heuristic (4 points)
+ Blokus Cover Heuristic (6 points)
