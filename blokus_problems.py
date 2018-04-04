@@ -50,7 +50,6 @@ class BlokusFillProblem(SearchProblem):
         return len(actions)
 
 
-
 #####################################################
 # This portion is incomplete.  Time to write code!  #
 #####################################################
@@ -70,10 +69,6 @@ class BlokusCornersProblem(SearchProblem):
                state.get_position(state.board_w - 1, 0) != -1 and \
                state.get_position(0, state.board_h - 1) != -1 and \
                state.get_position(state.board_w - 1, state.board_h - 1) != -1
-
-
-
-
 
     def get_successors(self, state):
         """
@@ -96,8 +91,11 @@ class BlokusCornersProblem(SearchProblem):
         This method returns the total cost of a particular sequence of actions.  The sequence must
         be composed of legal moves
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        moves_sum = 0
+        for move in actions:
+            moves_sum += move.piece.num_tiles
+        return moves_sum
 
 
 def blokus_corners_heuristic(state, problem):
@@ -116,11 +114,17 @@ def blokus_corners_heuristic(state, problem):
     util.raiseNotDefined()
 
 
+
+
+
+
+
+
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
         self.targets = targets.copy()
         self.expanded = 0
-        "*** YOUR CODE HERE ***"
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
         """
@@ -128,9 +132,11 @@ class BlokusCoverProblem(SearchProblem):
         """
         return self.board
 
-    def is_goal_state(self, state):
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+    def is_goal_state(self, state): #todo can be more efficiant
+        for (x, y) in self.targets:
+            if state.get_position(x,y) == -1:
+                return False
+        return True
 
     def get_successors(self, state):
         """
@@ -155,7 +161,6 @@ class BlokusCoverProblem(SearchProblem):
         """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
-
 
 def blokus_cover_heuristic(state, problem):
     "*** YOUR CODE HERE ***"

@@ -2,8 +2,8 @@
 In search.py, you will implement generic search algorithms
 """
 
-import util
 from queue import PriorityQueue
+import util
 
 
 class SearchProblem:
@@ -70,26 +70,26 @@ def depth_first_search(problem):
     fringe =[]
     seen = []
 
-    for L_succ in problem.get_successors(problem.get_start_state()):
-        fringe.append((L_succ, []))
+    fringe.append(((problem.get_start_state(), None, 0), []))
 
     while fringe:
-        L_state, path= fringe.pop()
-        board = L_state[0]
-        move = L_state[1]
+        l_state, path= fringe.pop()
+        board = l_state[0]
+        move = l_state[1]
+        if move is not None:
+            path = path + [move]  # add the move object to the path
 
-        path = path + [move] # add the move object to the path
         seen = seen + [board]
-
         if problem.is_goal_state(board):
             return path
 
         successors = problem.get_successors(board)
-        for L_succ in successors:
-            if L_succ[0] not in seen:
-                fringe.append((L_succ, path))
+        for l_succ in successors:
+            if l_succ[0] not in seen:
+                fringe.append((l_succ, path))
 
     return None
+
 
 def breadth_first_search(problem):
     """
@@ -103,8 +103,33 @@ def uniform_cost_search(problem):
     """
     Search the node of least total cost first.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe = PriorityQueue()
+    seen = set()
+
+    counter = 0
+
+    fringe.put((0, 0, ([], (problem.get_start_state(), None, 0))))
+
+    while fringe:
+        cost, yeah, (path, l_state) = fringe.get()
+
+        board = l_state[0]
+        move = l_state[1]
+
+        if move is not None:
+            path = path + [move]  # add the move object to the path
+
+        if problem.is_goal_state(board):
+                return path
+
+        seen.add(board)
+        
+        successors = problem.get_successors(board)
+        for l_succ in successors:
+            if l_succ[0] not in seen:
+                cost = problem.get_cost_of_actions(path + [l_succ[1]])
+                counter = counter + 1
+                fringe.put((cost, counter, (path, l_succ)))
 
 
 def null_heuristic(state, problem=None):
@@ -119,7 +144,9 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    return problem.is_goal_state(problem.get_start_state())
+    "*** YOUR CODE HERE ***"
+    util.raiseNotDefined()
+
 
 
 
