@@ -111,6 +111,12 @@ def blokus_corners_heuristic(state, problem):
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
     "*** YOUR CODE HERE ***"
+    '''
+    LIST OF IDEAS:
+    1: min of manhattan distances from some corner
+    2: avg of manhattan distances from some corner
+    
+    '''
     util.raiseNotDefined()
 
 

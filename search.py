@@ -127,10 +127,9 @@ def uniform_cost_search(problem):
         successors = problem.get_successors(board)
         for l_succ in successors:
             if l_succ[0] not in seen:
-                cost = cost + l_succ[1].piece.num_tiles
-                #cost = problem.get_cost_of_actions(path + [l_succ[1]])
+                cost = cost - l_succ[1].piece.num_tiles
                 counter = counter + 1
-                fringe.put((-cost, counter, (path, l_succ)))
+                fringe.put((cost, counter, (path, l_succ)))
 
 
 def null_heuristic(state, problem=None):
@@ -145,8 +144,33 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe = PriorityQueue()
+    seen = set()
+
+    counter = 0
+
+    fringe.put((0, 0, ([], (problem.get_start_state(), None, 0))))
+
+    while fringe:
+        cost, yeah, (path, l_state) = fringe.get()
+
+        board = l_state[0]
+        move = l_state[1]
+
+        if move is not None:
+            path = path + [move]  # add the move object to the path
+
+        if problem.is_goal_state(board):
+                return path
+
+        seen.add(board)
+
+        successors = problem.get_successors(board)
+        for l_succ in successors:
+            if l_succ[0] not in seen:
+                cost = cost - l_succ[1].piece.num_tiles - heuristic(l_succ)
+                counter = counter + 1
+                fringe.put((cost, counter, (path, l_succ)))
 
 
 

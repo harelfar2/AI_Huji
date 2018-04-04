@@ -6,9 +6,9 @@ Yoni:
 +BlokusCornersProblem (2 points)
 +BlokusCoverProblem (2 points)
 +Uniform cost search (2 points)
++A* search (3 points)
 
 
 Together:
- A* search (3 points)
  Blokus Corners Heuristic (4 points)
  Blokus Cover Heuristic (6 points)
