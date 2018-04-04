@@ -5,7 +5,7 @@ Yoni:
 +Depth first search (2 points)
 +BlokusCornersProblem (2 points)
 +BlokusCoverProblem (2 points)
-+Uniform cost search (2 points) (33838 nodes expanded on tiny set, might be too much)
++Uniform cost search (2 points)
 
 
 Together:
