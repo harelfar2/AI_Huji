@@ -123,13 +123,14 @@ def uniform_cost_search(problem):
                 return path
 
         seen.add(board)
-        
+
         successors = problem.get_successors(board)
         for l_succ in successors:
             if l_succ[0] not in seen:
-                cost = problem.get_cost_of_actions(path + [l_succ[1]])
+                cost = cost + l_succ[1].piece.num_tiles
+                #cost = problem.get_cost_of_actions(path + [l_succ[1]])
                 counter = counter + 1
-                fringe.put((cost, counter, (path, l_succ)))
+                fringe.put((-cost, counter, (path, l_succ)))
 
 
 def null_heuristic(state, problem=None):
