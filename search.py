@@ -73,7 +73,7 @@ def depth_first_search(problem):
     fringe.append(((problem.get_start_state(), None, 0), []))
 
     while fringe:
-        l_state, path= fringe.pop()
+        l_state, path = fringe.pop()
         board = l_state[0]
         move = l_state[1]
         if move is not None:
@@ -95,8 +95,28 @@ def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe =[]
+    seen = []
+
+    fringe.append(((problem.get_start_state(), None, 0), []))
+
+    while fringe:
+        l_state, path = fringe.pop()
+        board = l_state[0]
+        move = l_state[1]
+        if move is not None:
+            path = path + [move]  # add the move object to the path
+
+        seen = seen + [board]
+        if problem.is_goal_state(board):
+            return path
+
+        successors = problem.get_successors(board)
+        for l_succ in successors:
+            if l_succ[0] not in seen:
+                fringe.insert(0,(l_succ, path))
+
+    return None
 
 
 def uniform_cost_search(problem):
