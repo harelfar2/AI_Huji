@@ -114,15 +114,10 @@ def blokus_corners_heuristic(state, problem):
     '''
     LIST OF IDEAS:
     1: min of manhattan distances from some corner
-    2: avg of manhattan distances from some corner
-    
+    2: avg of manhattan distances from all corners
+    3: min distance from some wall
     '''
     util.raiseNotDefined()
-
-
-
-
-
 
 
 
