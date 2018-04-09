@@ -82,7 +82,7 @@ class BlokusCornersProblem(SearchProblem):
         """
         # Note that for the search problem, there is only one player - #0
         self.expanded = self.expanded + 1
-        return [(state.do_move(0, move), move, 1) for move in state.get_legal_moves(0)]
+        return [(state.do_move(0, move), move, move.piece.get_num_tiles()) for move in state.get_legal_moves(0)]
 
     def get_cost_of_actions(self, actions):
         """
