@@ -117,9 +117,90 @@ def blokus_corners_heuristic(state, problem):
     2: avg of manhattan distances from all corners
     3: min distance from some wall
     '''
-    util.raiseNotDefined()
+    board_h = state[0].board_h
+    board_w = state[0].board_w
+    board_side_max = state[0].board_h + state[0].board_w
+    min_dis_corners = [board_side_max] * 4
 
 
+    if state[0].state[0,0] == 0:
+        min_dis_corners[0] = 0
+
+    if state[0].state[0, board_w - 1] == 0:
+        min_dis_corners[1] = 0
+
+    if state[0].state[board_h - 1, 0] == 0:
+        min_dis_corners[2] = 0
+
+    if state[0].state[board_h - 1, board_w - 1] == 0:
+        min_dis_corners[3] = 0
+
+
+    for row in range(board_h):
+        for col in range(board_w):
+            if  state[0].state[row, col] == 0:
+                continue
+            if is_adj_to_piece(row, col, state[0]): # todo check
+                continue
+            if not is_diagonal_to_piece(row, col, state[0]): # todo check
+                continue
+
+            min_dis_corners = [min(min_dis_corners[0], util.manhattanDistance((0, 0), (row,col))),
+                               min(min_dis_corners[1], util.manhattanDistance((0, board_w - 1), (row, col))),
+                               min(min_dis_corners[2], util.manhattanDistance((board_h - 1, 0), (row, col))),
+                               min(min_dis_corners[3], util.manhattanDistance((board_h - 1, board_w - 1), (row, col)))]
+
+
+    return sum(min_dis_corners)
+
+
+def is_adj_to_piece(row, col, state):
+    flag = True
+
+    board = state.state
+    board_h = state.board_h
+    board_w = state.board_w
+    if col != 0:
+        flag = flag and board[row, col - 1] == -1
+
+    if col != board_w -1:
+        flag = flag and board[row, col + 1] == -1
+
+    if row != 0:
+        flag = flag and board[row - 1, col] == -1
+
+
+    if row != board_h - 1:
+        flag = flag and board[row + 1, col] == -1
+
+
+    return not flag
+
+
+def is_diagonal_to_piece(row, col, state):
+    board = state.state
+    board_h = state.board_h
+    board_w = state.board_w
+
+
+    if row != 0 and col != 0:
+        if board[row - 1, col - 1] == 0:
+            return True
+
+    if row != board_h - 1 and col != board_w - 1:
+        if board[row + 1, col + 1] == 0:
+            return True
+
+    if row != 0 and col != board_w - 1:
+        if board[row - 1, col + 1] == 0:
+            return True
+
+
+    if row != board_h - 1 and col != 0:
+        if board[row + 1, col - 1] == 0:
+            return True
+
+    return False
 
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
@@ -165,7 +246,41 @@ class BlokusCoverProblem(SearchProblem):
 
 def blokus_cover_heuristic(state, problem):
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    board_h = state[0].board_h
+    board_w = state[0].board_w
+    board_side_max = state[0].board_h + state[0].board_w
+    min_dis_corners = [board_side_max] * 4
+
+
+    if state[0].state[0,0] == 0:
+        min_dis_corners[0] = 0
+
+    if state[0].state[0, board_w - 1] == 0:
+        min_dis_corners[1] = 0
+
+    if state[0].state[board_h - 1, 0] == 0:
+        min_dis_corners[2] = 0
+
+    if state[0].state[board_h - 1, board_w - 1] == 0:
+        min_dis_corners[3] = 0
+
+
+    for row in range(board_h):
+        for col in range(board_w):
+            if  state[0].state[row, col] == 0:
+                continue
+            if is_adj_to_piece(row, col, state[0]): # todo check
+                continue
+            if not is_diagonal_to_piece(row, col, state[0]): # todo check
+                continue
+
+            min_dis_corners = [min(min_dis_corners[0], util.manhattanDistance((0, 0), (row,col))),
+                               min(min_dis_corners[1], util.manhattanDistance((0, board_w - 1), (row, col))),
+                               min(min_dis_corners[2], util.manhattanDistance((board_h - 1, 0), (row, col))),
+                               min(min_dis_corners[3], util.manhattanDistance((board_h - 1, board_w - 1), (row, col)))]
+
+
+    return sum(min_dis_corners)
 
 
 class ClosestLocationSearch:

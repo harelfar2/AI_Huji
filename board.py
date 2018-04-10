@@ -187,10 +187,10 @@ class Board:
         out_str = []
         for row in range(self.board_h):
             for col in range(self.board_w):
-                if self.state[row, col] == -1: #todo CAUSES ERROR
+                if self.state[row, col] == -1:
                     out_str.append('_')
                 else:
-                    out_str.append(str(self.state[row, col])) #todo CAUSES ERROR
+                    out_str.append(str(self.state[row, col]))
             out_str.append('\n')
         return ''.join(out_str)
 
