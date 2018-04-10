@@ -2,6 +2,7 @@
 In search.py, you will implement generic search algorithms
 """
 
+
 from queue import PriorityQueue
 import util
 

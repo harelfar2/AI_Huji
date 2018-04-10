@@ -246,7 +246,41 @@ class BlokusCoverProblem(SearchProblem):
 
 def blokus_cover_heuristic(state, problem):
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    board_h = state[0].board_h
+    board_w = state[0].board_w
+    board_side_max = state[0].board_h + state[0].board_w
+    min_dis_corners = [board_side_max] * 4
+
+
+    if state[0].state[0,0] == 0:
+        min_dis_corners[0] = 0
+
+    if state[0].state[0, board_w - 1] == 0:
+        min_dis_corners[1] = 0
+
+    if state[0].state[board_h - 1, 0] == 0:
+        min_dis_corners[2] = 0
+
+    if state[0].state[board_h - 1, board_w - 1] == 0:
+        min_dis_corners[3] = 0
+
+
+    for row in range(board_h):
+        for col in range(board_w):
+            if  state[0].state[row, col] == 0:
+                continue
+            if is_adj_to_piece(row, col, state[0]): # todo check
+                continue
+            if not is_diagonal_to_piece(row, col, state[0]): # todo check
+                continue
+
+            min_dis_corners = [min(min_dis_corners[0], util.manhattanDistance((0, 0), (row,col))),
+                               min(min_dis_corners[1], util.manhattanDistance((0, board_w - 1), (row, col))),
+                               min(min_dis_corners[2], util.manhattanDistance((board_h - 1, 0), (row, col))),
+                               min(min_dis_corners[3], util.manhattanDistance((board_h - 1, board_w - 1), (row, col)))]
+
+
+    return sum(min_dis_corners)
 
 
 class ClosestLocationSearch:
