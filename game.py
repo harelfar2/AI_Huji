@@ -230,8 +230,12 @@ def main():
     else:
         raise Exception('unrecognized options')
 
+import time
 
 if __name__ == "__main__":
+    start = time.time()
     main()
+    end = time.time()
+    print(end - start, "seconds")
     # input("Press Enter to continue...")
 ()

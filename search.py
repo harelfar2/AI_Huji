@@ -115,7 +115,7 @@ def breadth_first_search(problem):
         successors = problem.get_successors(board)
         for l_succ in successors:
             if l_succ[0] not in seen:
-                fringe.insert(0,(l_succ, path))
+                fringe.insert(0, (l_succ, path))
 
     return None
 
@@ -169,9 +169,16 @@ def a_star_search(problem, heuristic=null_heuristic):
 
     counter = 0
 
+    expansion = 0
+
     fringe.put((0, 0, ([], (problem.get_start_state(), None, 0))))
 
     while fringe:
+
+        if len(fringe.queue) > expansion * 1000:
+            print(len(fringe.queue), "expanded nodes")
+            expansion += 1
+
         path_g, yeah, (path, l_state) = fringe.get()
 
         board = l_state[0]
