@@ -188,7 +188,11 @@ def a_star_search(problem, heuristic=null_heuristic):
         successors = problem.get_successors(board)
         for l_succ in successors:
             if l_succ[0] not in seen:
-                cost = cost - l_succ[1].piece.num_tiles - heuristic(l_succ)
+                # print("current board is:")
+                # print(board)
+                # print("after move the board will be:")
+                # print(l_succ[0])
+                cost = cost - l_succ[1].piece.num_tiles - heuristic(l_succ, problem)
                 counter = counter + 1
                 fringe.put((cost, counter, (path, l_succ)))
 
