@@ -117,7 +117,26 @@ def blokus_corners_heuristic(state, problem):
     2: avg of manhattan distances from all corners
     3: min distance from some wall
     '''
-    util.raiseNotDefined()
+
+    '''
+       LIST OF IDEAS:
+       1: min of manhattan distances from some corner
+       2: avg of manhattan distances from all corners
+       3: min distance from some wall
+       '''
+    board_h = state[0].board_h
+    board_w = state[0].board_w
+    board_side_max = state[0].board_h + state[0].board_w
+    min_dis_corners = [board_side_max] * 4
+
+    summer = 0
+
+    for row in range(board_h):
+        for col in range(board_w):
+            if state[0].state[row,col] == 0:
+                summer -= 1
+
+
 
 
 
