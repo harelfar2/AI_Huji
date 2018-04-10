@@ -2,6 +2,7 @@
 In search.py, you will implement generic search algorithms
 """
 
+
 from queue import PriorityQueue
 import util
 
@@ -147,9 +148,8 @@ def uniform_cost_search(problem):
         successors = problem.get_successors(board)
         for l_succ in successors:
             if l_succ[0] not in seen:
-                cost = cost - l_succ[1].piece.num_tiles
                 counter = counter + 1
-                fringe.put((cost, counter, (path, l_succ)))
+                fringe.put((cost + l_succ[1].piece.num_tiles, counter, (path, l_succ)))
 
 
 def null_heuristic(state, problem=None):
@@ -172,10 +172,12 @@ def a_star_search(problem, heuristic=null_heuristic):
     fringe.put((0, 0, ([], (problem.get_start_state(), None, 0))))
 
     while fringe:
-        cost, yeah, (path, l_state) = fringe.get()
+        path_g, yeah, (path, l_state) = fringe.get()
 
         board = l_state[0]
         move = l_state[1]
+
+        path_g = path_g - heuristic((board, move), problem)
 
         if move is not None:
             path = path + [move]  # add the move object to the path
@@ -188,9 +190,14 @@ def a_star_search(problem, heuristic=null_heuristic):
         successors = problem.get_successors(board)
         for l_succ in successors:
             if l_succ[0] not in seen:
-                cost = cost - l_succ[1].piece.num_tiles - heuristic(l_succ)
+                # print("current board is:")
+                # print(board)
+                # print("after move the board will be:")
+                # print(l_succ[0])
+                g =  path_g + l_succ[1].piece.num_tiles #todo replace path g with counter of -1
+                h = heuristic(l_succ, problem)
                 counter = counter + 1
-                fringe.put((cost, counter, (path, l_succ)))
+                fringe.put((g + h, counter, (path, l_succ)))
 
 
 
