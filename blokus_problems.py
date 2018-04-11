@@ -105,20 +105,22 @@ def blokus_corners_heuristic(state, problem):
     board_h = board.board_h
     board_w = board.board_w
     board_side_max = board.board_h + board.board_w
-    min_dis_corners = [board_side_max] * 4
 
+    # min_dis_corners = [board_side_max] * 4
 
-    if board.get_position(0, 0) == 0:
-        min_dis_corners[0] = 0
+    min_distance = board_side_max * 4
 
-    if board.get_position(0, board_h - 1) == 0:
-        min_dis_corners[1] = 0
-
-    if board.get_position(board_w - 1, 0) == 0:
-        min_dis_corners[2] = 0
-
-    if board.get_position(board_w - 1, board_h - 1) == 0:
-        min_dis_corners[3] = 0
+    # if board.get_position(0, 0) == 0:
+    #     min_dis_corners[0] = 0
+    #
+    # if board.get_position(0, board_h - 1) == 0:
+    #     min_dis_corners[1] = 0
+    #
+    # if board.get_position(board_w - 1, 0) == 0:
+    #     min_dis_corners[2] = 0
+    #
+    # if board.get_position(board_w - 1, board_h - 1) == 0:
+    #     min_dis_corners[3] = 0
 
     for row in range(board_h):
         for col in range(board_w):
@@ -129,12 +131,32 @@ def blokus_corners_heuristic(state, problem):
             if not is_diagonal_to_piece(row, col, board):
                 continue
 
-            min_dis_corners = [min(min_dis_corners[0], util.manhattanDistance((0, 0), (col, row))),
-                               min(min_dis_corners[1], util.manhattanDistance((0, board_h - 1), (col, row))),
-                               min(min_dis_corners[2], util.manhattanDistance((board_w - 1, 0), (col, row))),
-                               min(min_dis_corners[3], util.manhattanDistance((board_w - 1, board_h - 1), (col, row)))]
+            point_sum_distances = 0
 
-    return sum(min_dis_corners)
+            if board.get_position(0, 0) == -1:
+                point_sum_distances += util.manhattanDistance((0, 0), (col, row))
+
+            if board.get_position(0, board_h - 1) == -1:
+                point_sum_distances += util.manhattanDistance((0, board_h - 1), (col, row))
+
+            if board.get_position(board_w - 1, 0) == -1:
+                point_sum_distances += util.manhattanDistance((board_w - 1, 0), (col, row))
+
+            if board.get_position(board_w - 1, board_h - 1) == -1:
+                point_sum_distances += util.manhattanDistance((board_w - 1, board_h - 1), (col, row))
+
+
+            min_distance = min(point_sum_distances, min_distance)
+
+            # min_dis_corners = [min(min_dis_corners[0], util.manhattanDistance((0, 0), (col, row))),
+            #                    min(min_dis_corners[1], util.manhattanDistance((0, board_h - 1), (col, row))),
+            #                    min(min_dis_corners[2], util.manhattanDistance((board_w - 1, 0), (col, row))),
+            #                    min(min_dis_corners[3], util.manhattanDistance((board_w - 1, board_h - 1), (col, row)))]
+
+    return min_distance
+
+
+    # return sum(min_dis_corners)
 
 
 def is_adj_to_piece(row, col, state):
@@ -237,11 +259,15 @@ def blokus_cover_heuristic(state, problem):
     board_side_max = board.board_h + board.board_w
 
     targets = problem.targets
-    min_dis_targets = [board_side_max] * len(targets)
+    # min_dis_targets = [board_side_max] * len(targets)
 
-    for i, (x,y) in enumerate(targets):
-        if board.get_position(x, y) == 0:
-            min_dis_targets[i] = 1
+    min_distance = board_side_max * len(targets)
+
+
+
+    # for i, (x,y) in enumerate(targets):
+    #     if board.get_position(x, y) == 0:
+    #         min_dis_targets[i] = 1
 
     for row in range(board_h):
         for col in range(board_w):
@@ -252,11 +278,20 @@ def blokus_cover_heuristic(state, problem):
             if not is_diagonal_to_piece(row, col, board):
                 continue
 
-            for i, target in enumerate(targets):
-                min_dis_targets[i] = min(min_dis_targets[i],
-                                         util.manhattanDistance(target, (col, row)))
+            point_sum_distances = 0
 
-    return sum(min_dis_targets)
+            for i, (x,y) in enumerate(targets):
+                if board.get_position(x,y) == -1:
+                    point_sum_distances += util.manhattanDistance((x, y), (col, row))
+
+            min_distance = min(point_sum_distances, min_distance)
+
+            # for i, target in enumerate(targets):
+            #     min_dis_targets[i] = min(min_dis_targets[i],
+            #                              util.manhattanDistance(target, (col, row)))
+
+    return min_distance
+    # return sum(min_dis_targets)
 
 
 class ClosestLocationSearch:

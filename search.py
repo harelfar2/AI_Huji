@@ -66,7 +66,7 @@ def get_path(node):
         path += [node.move]
         node = node.father
 
-    return reversed(path)
+    return path[::-1]
 
 
 def depth_first_search(problem):
@@ -107,7 +107,7 @@ def depth_first_search(problem):
             node = SearchNode(l_succ[0], l_succ[1], current_node, 0, 0)
             fringe.push(node)
 
-    return None
+    return []
 
 
 def breadth_first_search(problem):
@@ -137,7 +137,7 @@ def breadth_first_search(problem):
             node = SearchNode(l_succ[0], l_succ[1], current_node, 0, 0)
             fringe.push(node)
 
-    return None
+    return []
 
 
 def uniform_cost_search(problem):
@@ -169,6 +169,8 @@ def uniform_cost_search(problem):
 
             fringe.push(node, g)
 
+    return []
+
 
 def null_heuristic(state, problem=None):
     """
@@ -194,7 +196,7 @@ def a_star_search(problem, heuristic=null_heuristic):
         if problem.expanded % 1000 == 0:
             print("selected move:")
             print(current_node.board)
-            print("nodes expanded so far: " + problem.expanded)
+            print("nodes expanded so far: ", problem.expanded)
 
         if problem.is_goal_state(current_node.board):
             print(current_node.board)
@@ -212,6 +214,8 @@ def a_star_search(problem, heuristic=null_heuristic):
             node = SearchNode(succ[0], succ[1], current_node, g, h)
 
             fringe.push(node, g + h)
+
+    return []
 
 
 # Abbreviations
