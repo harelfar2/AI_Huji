@@ -100,57 +100,39 @@ class BlokusCornersProblem(SearchProblem):
 
 
 def blokus_corners_heuristic(state, problem):
-    """
-    Your heuristic for the BlokusCornersProblem goes here.
 
-    This heuristic must be consistent to ensure correctness.  First, try to come up
-    with an admissible heuristic; almost all admissible heuristics will be consistent
-    as well.
-
-    If using A* ever finds a solution that is worse uniform cost search finds,
-    your heuristic is *not* consistent, and probably not admissible!  On the other hand,
-    inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
-    """
-    "*** YOUR CODE HERE ***"
-    '''
-    LIST OF IDEAS:
-    1: min of manhattan distances from some corner
-    2: avg of manhattan distances from all corners
-    3: min distance from some wall
-    '''
-    board_h = state[0].board_h
-    board_w = state[0].board_w
-    board_side_max = state[0].board_h + state[0].board_w
+    board = state[0]
+    board_h = board.board_h
+    board_w = board.board_w
+    board_side_max = board.board_h + board.board_w
     min_dis_corners = [board_side_max] * 4
 
 
-    if state[0].state[0,0] == 0:
+    if board.get_position(0, 0) == 0:
         min_dis_corners[0] = 0
 
-    if state[0].state[0, board_w - 1] == 0:
+    if board.get_position(0, board_h - 1) == 0:
         min_dis_corners[1] = 0
 
-    if state[0].state[board_h - 1, 0] == 0:
+    if board.get_position(board_w - 1, 0) == 0:
         min_dis_corners[2] = 0
 
-    if state[0].state[board_h - 1, board_w - 1] == 0:
+    if board.get_position(board_w - 1, board_h - 1) == 0:
         min_dis_corners[3] = 0
-
 
     for row in range(board_h):
         for col in range(board_w):
-            if  state[0].state[row, col] == 0:
+            if board.get_position(row, col) == 0:
                 continue
-            if is_adj_to_piece(row, col, state[0]): # todo check
+            if is_adj_to_piece(row, col, board):
                 continue
-            if not is_diagonal_to_piece(row, col, state[0]): # todo check
+            if not is_diagonal_to_piece(row, col, board):
                 continue
 
-            min_dis_corners = [min(min_dis_corners[0], util.manhattanDistance((0, 0), (row,col))),
-                               min(min_dis_corners[1], util.manhattanDistance((0, board_w - 1), (row, col))),
-                               min(min_dis_corners[2], util.manhattanDistance((board_h - 1, 0), (row, col))),
-                               min(min_dis_corners[3], util.manhattanDistance((board_h - 1, board_w - 1), (row, col)))]
-
+            min_dis_corners = [min(min_dis_corners[0], util.manhattanDistance((0, 0), (col, row))),
+                               min(min_dis_corners[1], util.manhattanDistance((0, board_h - 1), (col, row))),
+                               min(min_dis_corners[2], util.manhattanDistance((board_w - 1, 0), (col, row))),
+                               min(min_dis_corners[3], util.manhattanDistance((board_w - 1, board_h - 1), (col, row)))]
 
     return sum(min_dis_corners)
 
@@ -247,9 +229,34 @@ class BlokusCoverProblem(SearchProblem):
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
+
 def blokus_cover_heuristic(state, problem):
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    board = state[0]
+    board_h = board.board_h
+    board_w = board.board_w
+    board_side_max = board.board_h + board.board_w
+
+    targets = problem.targets
+    min_dis_targets = [board_side_max] * len(targets)
+
+    for i, (x,y) in enumerate(targets):
+        if board.get_position(x, y) == 0:
+            min_dis_targets[i] = 1
+
+    for row in range(board_h):
+        for col in range(board_w):
+            if board.get_position(row, col) == 0:
+                continue
+            if is_adj_to_piece(row, col, board):
+                continue
+            if not is_diagonal_to_piece(row, col, board):
+                continue
+
+            for i, target in enumerate(targets):
+                min_dis_targets[i] = min(min_dis_targets[i],
+                                         util.manhattanDistance(target, (col, row)))
+
+    return sum(min_dis_targets)
 
 
 class ClosestLocationSearch:

@@ -176,7 +176,7 @@ class GuiDisplay(Display):
                 self.polygon(corners, color, fill_color=color, filled=True, smoothed=False)
         self.prev_state = state.copy()
 
-        for (i, j) in dots:
+        for (j, i) in dots:
             i_ = self.y - i - 1
             j_ = j
             x = GuiDisplay._line_width + j_ * (GuiDisplay._line_width + GuiDisplay._width_cell) + int(

@@ -1,7 +1,15 @@
 corners:
 
-6x6 tiny_set 2 bfs (9023, 17)
+6x6 tiny_set 2 bfs (9,023   17)
 6x6 tiny_set_2 ucs (19,069   17)
-6x6 tiny_set_2 astar (8,978   17)
-7x7 tiny_set_2 astar
-8x8 tiny_set_2 astar (DNF)
+6x6 tiny_set_2 astar (2,043   17)
+7x7 tiny_set_2 astar (18,897   21)
+8x8 tiny_set_2 astar (129241   24)
+
+
+cover:
+6x6 small_set ucs (3,3) [(2,2), (5, 5), (1, 4)] (7,914   8)
+6x6 small_set astar (3,3) [(2,2), (5, 5), (1, 4)] (2,559   8)
+10x10 small_set astar (3,3) [(2,2), (5, 5), (6, 7)] (10,601   8)
+
+
