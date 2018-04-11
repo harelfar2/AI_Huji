@@ -50,7 +50,23 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
+class SearchNode:
 
+    def __init__(self, board, move, father, cost, heuristic):
+        self.board = board
+        self.move = move
+        self.father = father
+        self.cost = cost
+        self.heuristic = heuristic
+
+def get_path(node):
+
+    path = []
+    while node.father is not None:
+        path += [node.move]
+        node = node.father
+
+    return reversed(path)
 
 
 def depth_first_search(problem):
@@ -68,26 +84,28 @@ def depth_first_search(problem):
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
 
-    fringe =[]
-    seen = []
+    fringe = util.Stack()
+    seen = set()
 
-    fringe.append(((problem.get_start_state(), None, 0), []))
+    fringe.push(SearchNode(problem.get_start_state(), None, None, 0, 0))
 
     while fringe:
-        l_state, path = fringe.pop()
-        board = l_state[0]
-        move = l_state[1]
-        if move is not None:
-            path = path + [move]  # add the move object to the path
 
-        seen = seen + [board]
-        if problem.is_goal_state(board):
-            return path
+        current_node = fringe.pop()
 
-        successors = problem.get_successors(board)
+        if problem.is_goal_state(current_node.board):
+            print(current_node.board)
+            return get_path(current_node)
+
+        if current_node.board in seen:
+            continue
+
+        seen.add(current_node.board)
+
+        successors = problem.get_successors(current_node.board)
         for l_succ in successors:
-            if l_succ[0] not in seen:
-                fringe.append((l_succ, path))
+            node = SearchNode(l_succ[0], l_succ[1], current_node, 0, 0)
+            fringe.push(node)
 
     return None
 
@@ -96,26 +114,28 @@ def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
-    fringe =[]
-    seen = []
+    fringe = util.Queue()
+    seen = set()
 
-    fringe.append(((problem.get_start_state(), None, 0), []))
+    fringe.push(SearchNode(problem.get_start_state(), None, None, 0, 0))
 
     while fringe:
-        l_state, path = fringe.pop()
-        board = l_state[0]
-        move = l_state[1]
-        if move is not None:
-            path = path + [move]  # add the move object to the path
 
-        seen = seen + [board]
-        if problem.is_goal_state(board):
-            return path
+        current_node = fringe.pop()
 
-        successors = problem.get_successors(board)
+        if problem.is_goal_state(current_node.board):
+            print(current_node.board)
+            return get_path(current_node)
+
+        if current_node.board in seen:
+            continue
+
+        seen.add(current_node.board)
+
+        successors = problem.get_successors(current_node.board)
         for l_succ in successors:
-            if l_succ[0] not in seen:
-                fringe.insert(0, (l_succ, path))
+            node = SearchNode(l_succ[0], l_succ[1], current_node, 0, 0)
+            fringe.push(node)
 
     return None
 
@@ -124,32 +144,30 @@ def uniform_cost_search(problem):
     """
     Search the node of least total cost first.
     """
-    fringe = PriorityQueue()
+    fringe = util.PriorityQueue()
     seen = set()
 
-    counter = 0
-
-    fringe.put((0, 0, ([], (problem.get_start_state(), None, 0))))
+    fringe.push(SearchNode(problem.get_start_state(), None, None, 0, 0), 0)
 
     while fringe:
-        cost, yeah, (path, l_state) = fringe.get()
 
-        board = l_state[0]
-        move = l_state[1]
+        current_node = fringe.pop()
 
-        if move is not None:
-            path = path + [move]  # add the move object to the path
+        if problem.is_goal_state(current_node.board):
+            print(current_node.board)
+            return get_path(current_node)
 
-        if problem.is_goal_state(board):
-                return path
+        if current_node.board in seen:
+            continue
 
-        seen.add(board)
+        seen.add(current_node.board)
 
-        successors = problem.get_successors(board)
-        for l_succ in successors:
-            if l_succ[0] not in seen:
-                counter = counter + 1
-                fringe.put((cost + l_succ[1].piece.num_tiles, counter, (path, l_succ)))
+        successors = problem.get_successors(current_node.board)
+        for succ in successors:
+            g = succ[2] + current_node.cost
+            node = SearchNode(succ[0], succ[1], current_node, g, 0)
+
+            fringe.push(node, g)
 
 
 def null_heuristic(state, problem=None):
@@ -164,49 +182,34 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    fringe = PriorityQueue()
+    fringe = util.PriorityQueue()
     seen = set()
 
-    counter = 0
-
-    expansion = 0
-
-    fringe.put((0, 0, ([], (problem.get_start_state(), None, 0))))
+    fringe.push(SearchNode(problem.get_start_state(), None, None, 0, 0), 0)
 
     while fringe:
 
-        if len(fringe.queue) > expansion * 1000:
-            print(len(fringe.queue), "expanded nodes")
-            expansion += 1
+        current_node = fringe.pop()
 
-        path_g, yeah, (path, l_state) = fringe.get()
+        if problem.expanded % 1000 == 0:
+            print(problem.expanded)
 
-        board = l_state[0]
-        move = l_state[1]
+        if problem.is_goal_state(current_node.board):
+            print(current_node.board)
+            return get_path(current_node)
 
-        path_g = path_g - heuristic((board, move), problem)
+        if current_node.board in seen:
+            continue
 
-        if move is not None:
-            path = path + [move]  # add the move object to the path
+        seen.add(current_node.board)
 
-        if problem.is_goal_state(board):
-                return path
+        successors = problem.get_successors(current_node.board)
+        for succ in successors:
+            g = succ[2] + current_node.cost
+            h = heuristic(succ, problem)
+            node = SearchNode(succ[0], succ[1], current_node, g, h)
 
-        seen.add(board)
-
-        successors = problem.get_successors(board)
-        for l_succ in successors:
-            if l_succ[0] not in seen:
-                # print("current board is:")
-                # print(board)
-                # print("after move the board will be:")
-                # print(l_succ[0])
-                g =  path_g + l_succ[1].piece.num_tiles #todo replace path g with counter of -1
-                h = heuristic(l_succ, problem)
-                counter = counter + 1
-                fringe.put((g + h, counter, (path, l_succ)))
-
-
+            fringe.push(node, g + h)
 
 
 # Abbreviations

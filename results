@@ -1,0 +1,7 @@
+corners:
+
+6x6 tiny_set 2 bfs (9023, 17)
+6x6 tiny_set_2 ucs (19,069   17)
+6x6 tiny_set_2 astar (8,978   17)
+7x7 tiny_set_2 astar
+8x8 tiny_set_2 astar (DNF)

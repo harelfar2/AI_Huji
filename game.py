@@ -236,6 +236,6 @@ if __name__ == "__main__":
     start = time.time()
     main()
     end = time.time()
-    print(end - start, "seconds")
-    # input("Press Enter to continue...")
+    print("took", end - start, "seconds")
+    #input("Press Enter to continue...")
 ()
