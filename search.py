@@ -52,12 +52,11 @@ class SearchProblem:
 
 class SearchNode:
 
-    def __init__(self, board, move, father, cost, heuristic):
+    def __init__(self, board, move, father, cost):
         self.board = board
         self.move = move
         self.father = father
         self.cost = cost
-        self.heuristic = heuristic
 
 def get_path(node):
 
@@ -87,14 +86,13 @@ def depth_first_search(problem):
     fringe = util.Stack()
     seen = set()
 
-    fringe.push(SearchNode(problem.get_start_state(), None, None, 0, 0))
+    fringe.push(SearchNode(problem.get_start_state(), None, None, 0))
 
     while fringe:
 
         current_node = fringe.pop()
 
         if problem.is_goal_state(current_node.board):
-            print(current_node.board)
             return get_path(current_node)
 
         if current_node.board in seen:
@@ -104,7 +102,7 @@ def depth_first_search(problem):
 
         successors = problem.get_successors(current_node.board)
         for l_succ in successors:
-            node = SearchNode(l_succ[0], l_succ[1], current_node, 0, 0)
+            node = SearchNode(l_succ[0], l_succ[1], current_node, 0)
             fringe.push(node)
 
     return []
@@ -117,14 +115,13 @@ def breadth_first_search(problem):
     fringe = util.Queue()
     seen = set()
 
-    fringe.push(SearchNode(problem.get_start_state(), None, None, 0, 0))
+    fringe.push(SearchNode(problem.get_start_state(), None, None, 0))
 
     while fringe:
 
         current_node = fringe.pop()
 
         if problem.is_goal_state(current_node.board):
-            print(current_node.board)
             return get_path(current_node)
 
         if current_node.board in seen:
@@ -134,7 +131,7 @@ def breadth_first_search(problem):
 
         successors = problem.get_successors(current_node.board)
         for l_succ in successors:
-            node = SearchNode(l_succ[0], l_succ[1], current_node, 0, 0)
+            node = SearchNode(l_succ[0], l_succ[1], current_node, 0)
             fringe.push(node)
 
     return []
@@ -147,14 +144,13 @@ def uniform_cost_search(problem):
     fringe = util.PriorityQueue()
     seen = set()
 
-    fringe.push(SearchNode(problem.get_start_state(), None, None, 0, 0), 0)
+    fringe.push(SearchNode(problem.get_start_state(), None, None, 0), 0)
 
     while fringe:
 
         current_node = fringe.pop()
 
         if problem.is_goal_state(current_node.board):
-            print(current_node.board)
             return get_path(current_node)
 
         if current_node.board in seen:
@@ -165,7 +161,7 @@ def uniform_cost_search(problem):
         successors = problem.get_successors(current_node.board)
         for succ in successors:
             g = succ[2] + current_node.cost
-            node = SearchNode(succ[0], succ[1], current_node, g, 0)
+            node = SearchNode(succ[0], succ[1], current_node, g)
 
             fringe.push(node, g)
 
@@ -187,19 +183,18 @@ def a_star_search(problem, heuristic=null_heuristic):
     fringe = util.PriorityQueue()
     seen = set()
 
-    fringe.push(SearchNode(problem.get_start_state(), None, None, 0, 0), 0)
+    fringe.push(SearchNode(problem.get_start_state(), None, None, 0), 0)
 
     while fringe:
 
         current_node = fringe.pop()
 
-        if problem.expanded % 1000 == 0:
-            print("selected move:")
-            print(current_node.board)
-            print("nodes expanded so far: ", problem.expanded)
+        # if problem.expanded % 1000 == 0:
+        #     print("selected move:")
+        #     print(current_node.board)
+        #     print("nodes expanded so far: ", problem.expanded)
 
         if problem.is_goal_state(current_node.board):
-            print(current_node.board)
             return get_path(current_node)
 
         if current_node.board in seen:
@@ -211,7 +206,7 @@ def a_star_search(problem, heuristic=null_heuristic):
         for succ in successors:
             g = succ[2] + current_node.cost
             h = heuristic(succ, problem)
-            node = SearchNode(succ[0], succ[1], current_node, g, h)
+            node = SearchNode(succ[0], succ[1], current_node, g)
 
             fringe.push(node, g + h)
 
