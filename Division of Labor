@@ -1,5 +1,5 @@
 Harel:
--Breadth first search (1 points) (NOT WORKING)
++Breadth first search (1 points)
 
 Yoni:
 +Depth first search (2 points)
@@ -10,5 +10,5 @@ Yoni:
 
 
 Together:
- Blokus Corners Heuristic (4 points)
- Blokus Cover Heuristic (6 points)
++Blokus Corners Heuristic (4 points)
++Blokus Cover Heuristic (6 points)
