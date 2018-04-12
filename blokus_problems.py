@@ -248,8 +248,10 @@ class BlokusCoverProblem(SearchProblem):
         This method returns the total cost of a particular sequence of actions.  The sequence must
         be composed of legal moves
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        moves_sum = 0
+        for move in actions:
+            moves_sum += move.piece.num_tiles
+        return moves_sum
 
 
 def blokus_cover_heuristic(state, problem):
