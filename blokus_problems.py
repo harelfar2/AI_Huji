@@ -1,5 +1,5 @@
 from board import Board
-from search import SearchProblem, ucs
+from search import SearchProblem, ucs, a_star_search
 import util
 
 
@@ -100,27 +100,12 @@ class BlokusCornersProblem(SearchProblem):
 
 
 def blokus_corners_heuristic(state, problem):
-
     board = state[0]
     board_h = board.board_h
     board_w = board.board_w
     board_side_max = board.board_h + board.board_w
 
-    # min_dis_corners = [board_side_max] * 4
-
     min_distance = board_side_max * 4
-
-    # if board.get_position(0, 0) == 0:
-    #     min_dis_corners[0] = 0
-    #
-    # if board.get_position(0, board_h - 1) == 0:
-    #     min_dis_corners[1] = 0
-    #
-    # if board.get_position(board_w - 1, 0) == 0:
-    #     min_dis_corners[2] = 0
-    #
-    # if board.get_position(board_w - 1, board_h - 1) == 0:
-    #     min_dis_corners[3] = 0
 
     for row in range(board_h):
         for col in range(board_w):
@@ -134,29 +119,20 @@ def blokus_corners_heuristic(state, problem):
             point_sum_distances = 0
 
             if board.get_position(0, 0) == -1:
-                point_sum_distances += util.manhattanDistance((0, 0), (col, row))
+                point_sum_distances += util.manhattanDistance((0, 0), (col, row)) - 1
 
             if board.get_position(0, board_h - 1) == -1:
-                point_sum_distances += util.manhattanDistance((0, board_h - 1), (col, row))
+                point_sum_distances += util.manhattanDistance((0, board_h - 1), (col, row)) - 1
 
             if board.get_position(board_w - 1, 0) == -1:
-                point_sum_distances += util.manhattanDistance((board_w - 1, 0), (col, row))
+                point_sum_distances += util.manhattanDistance((board_w - 1, 0), (col, row)) - 1
 
             if board.get_position(board_w - 1, board_h - 1) == -1:
-                point_sum_distances += util.manhattanDistance((board_w - 1, board_h - 1), (col, row))
+                point_sum_distances += util.manhattanDistance((board_w - 1, board_h - 1), (col, row)) - 1
 
-
-            min_distance = min(point_sum_distances, min_distance)
-
-            # min_dis_corners = [min(min_dis_corners[0], util.manhattanDistance((0, 0), (col, row))),
-            #                    min(min_dis_corners[1], util.manhattanDistance((0, board_h - 1), (col, row))),
-            #                    min(min_dis_corners[2], util.manhattanDistance((board_w - 1, 0), (col, row))),
-            #                    min(min_dis_corners[3], util.manhattanDistance((board_w - 1, board_h - 1), (col, row)))]
+            min_distance = min(point_sum_distances + 1, min_distance)
 
     return min_distance
-
-
-    # return sum(min_dis_corners)
 
 
 def is_adj_to_piece(row, col, state):
@@ -206,8 +182,6 @@ def is_diagonal_to_piece(row, col, state):
             return True
 
     return False
-
-
 
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
@@ -261,15 +235,8 @@ def blokus_cover_heuristic(state, problem):
     board_side_max = board.board_h + board.board_w
 
     targets = problem.targets
-    # min_dis_targets = [board_side_max] * len(targets)
 
     min_distance = board_side_max * len(targets)
-
-
-
-    # for i, (x,y) in enumerate(targets):
-    #     if board.get_position(x, y) == 0:
-    #         min_dis_targets[i] = 1
 
     for row in range(board_h):
         for col in range(board_w):
@@ -282,18 +249,13 @@ def blokus_cover_heuristic(state, problem):
 
             point_sum_distances = 0
 
-            for i, (x,y) in enumerate(targets):
-                if board.get_position(x,y) == -1:
-                    point_sum_distances += util.manhattanDistance((x, y), (col, row))
+            for i, (x, y) in enumerate(targets):
+                if board.get_position(x, y) == -1:
+                    point_sum_distances += util.manhattanDistance((x, y), (col, row)) - 1
 
-            min_distance = min(point_sum_distances, min_distance)
-
-            # for i, target in enumerate(targets):
-            #     min_dis_targets[i] = min(min_dis_targets[i],
-            #                              util.manhattanDistance(target, (col, row)))
+            min_distance = min(point_sum_distances + 1, min_distance)
 
     return min_distance
-    # return sum(min_dis_targets)
 
 
 class ClosestLocationSearch:
@@ -304,8 +266,12 @@ class ClosestLocationSearch:
 
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=(0, 0)):
         self.expanded = 0
-        self.targets = targets.copy()
-        "*** YOUR CODE HERE ***"
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
+        self.targets = list(targets.copy())
+        self.board_w = board_w
+        self.board_h = board_h
+        self.piece_list = piece_list
+        self.starting_point = starting_point
 
     def get_start_state(self):
         """
@@ -332,10 +298,21 @@ class ClosestLocationSearch:
 
         return backtrace
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
 
+        current_state = self.board.__copy__()
+        backtrace = []
+        # while self.targets:
+        #     cur_target = self.targets.pop()
+        #     problem = BlokusCoverProblem(self.board_w,self.board_h, self.piece_list, self.starting_point, [cur_target])
+        #     one_back_trace = a_star_search(problem, blokus_cover_heuristic)
+        #     for action in one_back_trace:
+        #         backtrace.append(action)
 
+        problem = BlokusCoverProblem(self.board_w, self.board_h, self.piece_list, self.starting_point, [self.targets[0]])
+        one_back_trace = a_star_search(problem, blokus_cover_heuristic)
+        for action in one_back_trace:
+            backtrace.append(action)
+        return backtrace
 
 class MiniContestSearch :
     """
