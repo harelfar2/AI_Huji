@@ -299,19 +299,19 @@ class ClosestLocationSearch:
         return backtrace
         """
 
-        current_state = self.board.__copy__()
         backtrace = []
-        # while self.targets:
-        #     cur_target = self.targets.pop()
-        #     problem = BlokusCoverProblem(self.board_w,self.board_h, self.piece_list, self.starting_point, [cur_target])
-        #     one_back_trace = a_star_search(problem, blokus_cover_heuristic)
-        #     for action in one_back_trace:
-        #         backtrace.append(action)
 
-        problem = BlokusCoverProblem(self.board_w, self.board_h, self.piece_list, self.starting_point, [self.targets[0]])
-        one_back_trace = a_star_search(problem, blokus_cover_heuristic)
-        for action in one_back_trace:
-            backtrace.append(action)
+        while self.targets:
+            cur_target = self.targets.pop()
+            problem = BlokusCoverProblem(self.board_w, self.board_h, self.piece_list, self.starting_point, [cur_target])
+            if backtrace:
+                for action in backtrace:
+                    problem.board.do_move(0, action)
+
+            one_back_trace = a_star_search(problem, blokus_cover_heuristic)
+            for action in one_back_trace:
+                backtrace.append(action)
+
         return backtrace
 
 class MiniContestSearch :
