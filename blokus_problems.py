@@ -271,6 +271,7 @@ class ClosestLocationSearch:
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=(0, 0)):
         self.expanded = 0
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
+        self.start_board = Board(board_w, board_h, 1, piece_list, starting_point)
         self.targets = list(targets.copy())
         self.board_w = board_w
         self.board_h = board_h
@@ -281,7 +282,7 @@ class ClosestLocationSearch:
         """
         Returns the start state for the search problem
         """
-        return self.board
+        return self.start_board
 
     def solve(self):
         """
@@ -306,18 +307,24 @@ class ClosestLocationSearch:
         backtrace = []
         one_target_back_trace = None
 
+        completed_targets = []
+
         while self.targets:
             cur_target = self.targets.pop()
-            problem = BlokusCoverProblem(self.board_w, self.board_h, self.piece_list, self.starting_point, [cur_target])
-
+            problem = BlokusCoverProblem(self.board_w, self.board_h, self.piece_list, self.starting_point,
+                                         completed_targets + [cur_target])
 
             if one_target_back_trace:
                 for action in one_target_back_trace:
-                    self.board.do_move(0, action)
+                    self.board = self.board.do_move(0, action)
+
+            problem.board = self.board
 
             one_target_back_trace = a_star_search_closest(problem, blokus_cover_heuristic, self.board.__copy__())
             for action in one_target_back_trace:
                 backtrace.append(action)
+
+            completed_targets.append(cur_target)
 
         return backtrace
 
