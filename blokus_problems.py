@@ -326,6 +326,10 @@ class ClosestLocationSearch:
 
             completed_targets.append(cur_target)
 
+            self.expanded += problem.expanded
+
+            print("completed target", cur_target, "with", problem.expanded, "nodes")
+
         return backtrace
 
 

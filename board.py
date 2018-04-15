@@ -224,7 +224,7 @@ class Move:
 
     def __str__(self):
         out_str = [[' ' for _ in range(5)] for _ in range(5)]
-        for (x, y) in self.orientation:
+        for (y, x) in self.orientation:
             out_str[x][y] = '0'
         out_str = '\n'.join(
             [''.join([x_pos for x_pos in out_str[y_val]])

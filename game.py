@@ -130,9 +130,11 @@ def play_approximate_search(problem):
     back_trace = problem.solve()
     display = GuiDisplay(problem.board.board_w, problem.board.board_h, title='Intro to AI -- 67842 -- Ex1')
     board = problem.get_start_state()
+
+
     for action in back_trace:
         board.add_move(0, action)
-        display.draw_board(board, dots=problem.targets)
+    display.draw_board(board, dots=problem.targets)
     print("Expanded nodes: %d, score: %d" % (problem.expanded, board.score(0)))
 
 

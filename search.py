@@ -189,11 +189,6 @@ def a_star_search(problem, heuristic=null_heuristic):
 
         current_node = fringe.pop()
 
-        # if problem.expanded % 1000 == 0:
-        #     print("selected move:")
-        #     print(current_node.board)
-        #     print("nodes expanded so far: ", problem.expanded)
-
         if problem.is_goal_state(current_node.board):
             return get_path(current_node)
 
