@@ -1,5 +1,5 @@
 from board import Board
-from search import SearchProblem, ucs, a_star_search
+from search import SearchProblem, ucs, SearchNode, get_path
 import util
 
 
@@ -101,6 +101,8 @@ class BlokusCornersProblem(SearchProblem):
 
 def blokus_corners_heuristic(state, problem):
     board = state[0]
+    if problem.is_goal_state(board):
+        return 0
     board_h = board.board_h
     board_w = board.board_w
     board_side_max = board.board_h + board.board_w
@@ -230,6 +232,8 @@ class BlokusCoverProblem(SearchProblem):
 
 def blokus_cover_heuristic(state, problem):
     board = state[0]
+    if problem.is_goal_state(board):
+        return 0
     board_h = board.board_h
     board_w = board.board_w
     board_side_max = board.board_h + board.board_w
@@ -300,19 +304,57 @@ class ClosestLocationSearch:
         """
 
         backtrace = []
+        one_target_back_trace = None
 
         while self.targets:
             cur_target = self.targets.pop()
             problem = BlokusCoverProblem(self.board_w, self.board_h, self.piece_list, self.starting_point, [cur_target])
-            if backtrace:
-                for action in backtrace:
-                    problem.board.do_move(0, action)
 
-            one_back_trace = a_star_search(problem, blokus_cover_heuristic)
-            for action in one_back_trace:
+
+            if one_target_back_trace:
+                for action in one_target_back_trace:
+                    self.board.do_move(0, action)
+
+            one_target_back_trace = a_star_search_closest(problem, blokus_cover_heuristic, self.board.__copy__())
+            for action in one_target_back_trace:
                 backtrace.append(action)
 
         return backtrace
+
+
+
+
+
+def a_star_search_closest(problem, heuristic, board):
+    """
+    Search the node that has the lowest combined cost and heuristic first.
+    """
+    fringe = util.PriorityQueue()
+    seen = set()
+
+    fringe.push(SearchNode(board, None, None, 0), 0)
+
+    while fringe:
+
+        current_node = fringe.pop()
+
+        if problem.is_goal_state(current_node.board):
+            return get_path(current_node)
+
+        if current_node.board in seen:
+            continue
+
+        seen.add(current_node.board)
+
+        successors = problem.get_successors(current_node.board)
+        for succ in successors:
+            g = succ[2] + current_node.cost
+            h = heuristic(succ, problem)
+            node = SearchNode(succ[0], succ[1], current_node, g)
+
+            fringe.push(node, g + h)
+
+    return []
 
 class MiniContestSearch :
     """
