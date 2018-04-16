@@ -109,6 +109,8 @@ def blokus_corners_heuristic(state, problem):
 
     min_distance = board_side_max * 4
 
+    max_distance = 0
+
     for row in range(board_h):
         for col in range(board_w):
             if board.get_position(row, col) == 0:
@@ -118,23 +120,39 @@ def blokus_corners_heuristic(state, problem):
             if not is_diagonal_to_piece(row, col, board):
                 continue
 
-            point_sum_distances = 0
+
+
 
             if board.get_position(0, 0) == -1:
-                point_sum_distances += util.manhattanDistance((0, 0), (col, row)) - 1
+                max_distance = max(max_distance, chessDistance((0, 0), (col, row)))
 
             if board.get_position(0, board_h - 1) == -1:
-                point_sum_distances += util.manhattanDistance((0, board_h - 1), (col, row)) - 1
+                max_distance = max(max_distance, chessDistance((0, board_h - 1), (col, row)))
 
             if board.get_position(board_w - 1, 0) == -1:
-                point_sum_distances += util.manhattanDistance((board_w - 1, 0), (col, row)) - 1
+                max_distance = max(max_distance, chessDistance((board_w - 1, 0), (col, row)))
 
             if board.get_position(board_w - 1, board_h - 1) == -1:
-                point_sum_distances += util.manhattanDistance((board_w - 1, board_h - 1), (col, row)) - 1
+                max_distance = max(max_distance, chessDistance((board_w - 1, board_h - 1), (col, row)))
 
-            min_distance = min(point_sum_distances + 1, min_distance)
+            #
+            # point_sum_distances = 0
+            #
+            # if board.get_position(0, 0) == -1:
+            #     point_sum_distances += chessDistance((0, 0), (col, row)) - 1
+            #
+            # if board.get_position(0, board_h - 1) == -1:
+            #     point_sum_distances += chessDistance((0, board_h - 1), (col, row)) - 1
+            #
+            # if board.get_position(board_w - 1, 0) == -1:
+            #     point_sum_distances += chessDistance((board_w - 1, 0), (col, row)) - 1
+            #
+            # if board.get_position(board_w - 1, board_h - 1) == -1:
+            #     point_sum_distances += chessDistance((board_w - 1, board_h - 1), (col, row)) - 1
 
-    return min_distance
+            #min_distance = min(point_sum_distances + 1, min_distance)
+
+    return max_distance
 
 
 def is_adj_to_piece(row, col, state):
@@ -185,6 +203,12 @@ def is_diagonal_to_piece(row, col, state):
 
     return False
 
+
+def chessDistance(xy1, xy2):
+    "Returns the Manhattan distance between points xy1 and xy2"
+    return max(abs(xy1[0] - xy2[0]), abs(xy1[1] - xy2[1]))
+
+
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
         self.targets = targets.copy()
@@ -232,8 +256,10 @@ class BlokusCoverProblem(SearchProblem):
 
 def blokus_cover_heuristic(state, problem):
     board = state[0]
+
     if problem.is_goal_state(board):
         return 0
+
     board_h = board.board_h
     board_w = board.board_w
     board_side_max = board.board_h + board.board_w
@@ -241,6 +267,8 @@ def blokus_cover_heuristic(state, problem):
     targets = problem.targets
 
     min_distance = board_side_max * len(targets)
+
+    max_distance = 0
 
     for row in range(board_h):
         for col in range(board_w):
@@ -251,15 +279,15 @@ def blokus_cover_heuristic(state, problem):
             if not is_diagonal_to_piece(row, col, board):
                 continue
 
-            point_sum_distances = 0
 
             for i, (x, y) in enumerate(targets):
                 if board.get_position(x, y) == -1:
-                    point_sum_distances += util.manhattanDistance((x, y), (col, row)) - 1
+                    # point_sum_distances += chessDistance((x, y), (col, row)) - 1
+                    max_distance = max(max_distance, chessDistance((x, y), (col, row)))
 
-            min_distance = min(point_sum_distances + 1, min_distance)
+            #min_distance = min(point_sum_distances + 1, min_distance)
 
-    return min_distance
+    return  max_distance
 
 
 class ClosestLocationSearch:
