@@ -139,6 +139,7 @@ class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
         self.targets = targets.copy()
         self.expanded = 0
+        self.starting_point = starting_point
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
@@ -261,7 +262,8 @@ class ClosestLocationSearch:
         backtrace = []
         one_target_back_trace = None
 
-        targets = list(reversed(self.targets))
+        targets = list(reversed(sort_targets(self.targets, self.starting_point)))
+
 
         completed_targets = []
 
@@ -288,7 +290,9 @@ class ClosestLocationSearch:
 
         return backtrace
 
-
+def sort_targets(targets, starting_point):
+    targets.sort(key=lambda p: chess_distance(p, starting_point))
+    return targets
 
 
 
@@ -323,6 +327,7 @@ def a_star_search_closest(problem, heuristic, board):
 
     return []
 
+
 class MiniContestSearch :
     """
     Implement your contest entry here
@@ -341,7 +346,6 @@ class MiniContestSearch :
     def solve(self):
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
-
 
 
 def is_adj_to_piece(row, col, state):
