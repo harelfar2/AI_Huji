@@ -305,7 +305,6 @@ class ClosestLocationSearch:
         """
 
         backtrace = []
-        seen = set()
         one_target_back_trace = None
 
         targets = list(reversed(self.targets))
@@ -323,7 +322,7 @@ class ClosestLocationSearch:
 
             problem.board = self.board
 
-            one_target_back_trace = a_star_search_closest(problem, blokus_cover_heuristic, self.board.__copy__(), seen)
+            one_target_back_trace = a_star_search_closest(problem, blokus_cover_heuristic, self.board.__copy__())
             for action in one_target_back_trace:
                 backtrace.append(action)
 
@@ -339,12 +338,14 @@ class ClosestLocationSearch:
 
 
 
-def a_star_search_closest(problem, heuristic, board, seen):
+def a_star_search_closest(problem, heuristic, board):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
     fringe = util.PriorityQueue()
     fringe.push(SearchNode(board, None, None, 0), 0)
+
+    seen = set()
 
     while fringe:
 
