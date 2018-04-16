@@ -52,8 +52,8 @@ class SearchProblem:
 
 class SearchNode:
 
-    def __init__(self, board, move, father, cost):
-        self.board = board
+    def __init__(self, state, move, father, cost):
+        self.state = state
         self.move = move
         self.father = father
         self.cost = cost
@@ -92,15 +92,15 @@ def depth_first_search(problem):
 
         current_node = fringe.pop()
 
-        if problem.is_goal_state(current_node.board):
+        if problem.is_goal_state(current_node.state):
             return get_path(current_node)
 
-        if current_node.board in seen:
+        if current_node.state in seen:
             continue
 
-        seen.add(current_node.board)
+        seen.add(current_node.state)
 
-        successors = problem.get_successors(current_node.board)
+        successors = problem.get_successors(current_node.state)
         for l_succ in successors:
             node = SearchNode(l_succ[0], l_succ[1], current_node, 0)
             fringe.push(node)
@@ -121,15 +121,15 @@ def breadth_first_search(problem):
 
         current_node = fringe.pop()
 
-        if problem.is_goal_state(current_node.board):
+        if problem.is_goal_state(current_node.state):
             return get_path(current_node)
 
-        if current_node.board in seen:
+        if current_node.state in seen:
             continue
 
-        seen.add(current_node.board)
+        seen.add(current_node.state)
 
-        successors = problem.get_successors(current_node.board)
+        successors = problem.get_successors(current_node.state)
         for l_succ in successors:
             node = SearchNode(l_succ[0], l_succ[1], current_node, 0)
             fringe.push(node)
@@ -150,15 +150,15 @@ def uniform_cost_search(problem):
 
         current_node = fringe.pop()
 
-        if problem.is_goal_state(current_node.board):
+        if problem.is_goal_state(current_node.state):
             return get_path(current_node)
 
-        if current_node.board in seen:
+        if current_node.state in seen:
             continue
 
-        seen.add(current_node.board)
+        seen.add(current_node.state)
 
-        successors = problem.get_successors(current_node.board)
+        successors = problem.get_successors(current_node.state)
         for succ in successors:
             g = succ[2] + current_node.cost
             node = SearchNode(succ[0], succ[1], current_node, g)
@@ -186,21 +186,17 @@ def a_star_search(problem, heuristic=null_heuristic):
     fringe.push(SearchNode(problem.get_start_state(), None, None, 0), 0)
 
     while fringe:
-
-        if problem.expanded % 1000 == 0:
-            print(problem.expanded)
-
         current_node = fringe.pop()
 
-        if problem.is_goal_state(current_node.board):
+        if problem.is_goal_state(current_node.state):
             return get_path(current_node)
 
-        if current_node.board in seen:
+        if current_node.state in seen:
             continue
 
-        seen.add(current_node.board)
+        seen.add(current_node.state)
 
-        successors = problem.get_successors(current_node.board)
+        successors = problem.get_successors(current_node.state)
         for succ in successors:
             g = succ[2] + current_node.cost
             h = heuristic(succ, problem)

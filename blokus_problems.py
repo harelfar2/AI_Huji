@@ -1,5 +1,5 @@
 from board import Board
-from search import SearchProblem, ucs, SearchNode, get_path
+from search import SearchProblem, a_star_search, SearchNode, get_path
 import util
 
 a = 1
@@ -115,7 +115,7 @@ def blokus_corners_heuristic(state, problem):
         if board.get_position(x, y) == -1:
             targets += [(x, y)]
 
-    min_distance = board_side_max
+    max_distance = 0
 
     for row in range(board_h):
         for col in range(board_w):
@@ -126,13 +126,13 @@ def blokus_corners_heuristic(state, problem):
             if not is_diagonal_to_piece(row, col, board):
                 continue
 
-            max_distance = 0
+            min_distance = board_side_max
             for target in targets:
-                max_distance = max(max_distance, chess_distance((col, row), target))
+                min_distance = min(min_distance, chess_distance((col, row), target))
 
-            min_distance = min(min_distance, max_distance)
+            max_distance = max(min_distance, max_distance)
 
-    return min_distance * len(targets)
+    return max_distance * len(targets)
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -197,7 +197,7 @@ def blokus_cover_heuristic(state, problem):
         if board.get_position(x, y) == -1:
             targets += [(x, y)]
 
-    min_distance = board_side_max
+    max_distance = 0
 
     for row in range(board_h):
         for col in range(board_w):
@@ -208,13 +208,13 @@ def blokus_cover_heuristic(state, problem):
             if not is_diagonal_to_piece(row, col, board):
                 continue
 
-            max_distance = 0
+            min_distance = board_side_max
             for target in targets:
-                max_distance = max(max_distance, chess_distance((col, row), target))
+                min_distance = min(min_distance, chess_distance((col, row), target))
 
-            min_distance = min(min_distance, max_distance)
+            max_distance = max(min_distance, max_distance)
 
-    return min_distance * len(targets)
+    return max_distance * len(targets)
 
 
 class ClosestLocationSearch:
@@ -290,10 +290,10 @@ class ClosestLocationSearch:
 
         return backtrace
 
+
 def sort_targets(targets, starting_point):
     targets.sort(key=lambda p: chess_distance(p, starting_point))
     return targets
-
 
 
 def a_star_search_closest(problem, heuristic, board):
@@ -309,15 +309,15 @@ def a_star_search_closest(problem, heuristic, board):
 
         current_node = fringe.pop()
 
-        if problem.is_goal_state(current_node.board):
+        if problem.is_goal_state(current_node.state):
             return get_path(current_node)
 
-        if current_node.board in seen:
+        if current_node.state in seen:
             continue
 
-        seen.add(current_node.board)
+        seen.add(current_node.state)
 
-        successors = problem.get_successors(current_node.board)
+        successors = problem.get_successors(current_node.state)
         for succ in successors:
             g = succ[2] + current_node.cost
             h = heuristic(succ, problem)
@@ -334,8 +334,14 @@ class MiniContestSearch :
     """
 
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=(0, 0)):
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
         self.targets = targets.copy()
-        "*** YOUR CODE HERE ***"
+        self.board_w = board_w
+        self.board_h = board_h
+        self.piece_list = piece_list
+        self.starting_point = starting_point
+        self.targets = targets.copy()
+
 
     def get_start_state(self):
         """
@@ -345,7 +351,16 @@ class MiniContestSearch :
 
     def solve(self):
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+
+        #targets = list(reversed(sort_targets(self.targets, self.starting_point)))
+        search = ClosestLocationSearch(self.board_w, self.board_h, self.piece_list, self.starting_point, self.targets)
+
+        res = search.solve()
+
+        self.expanded = search.expanded
+
+        return res
 
 
 def is_adj_to_piece(row, col, state):
