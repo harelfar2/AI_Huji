@@ -187,6 +187,9 @@ def a_star_search(problem, heuristic=null_heuristic):
 
     while fringe:
 
+        if problem.expanded % 1000 == 0:
+            print(problem.expanded)
+
         current_node = fringe.pop()
 
         if problem.is_goal_state(current_node.board):

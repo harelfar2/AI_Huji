@@ -2,6 +2,7 @@ from board import Board
 from search import SearchProblem, ucs, SearchNode, get_path
 import util
 
+a = 1
 
 class BlokusFillProblem(SearchProblem):
     """
@@ -107,9 +108,14 @@ def blokus_corners_heuristic(state, problem):
     board_w = board.board_w
     board_side_max = board.board_h + board.board_w
 
-    min_distance = board_side_max * 4
+    corners = [(0, 0), (0, board_h - 1), (board_w - 1, 0), (board_w - 1, board_h - 1)]
+    targets = []
 
-    max_distance = 0
+    for (x, y) in corners:
+        if board.get_position(x, y) == -1:
+            targets += [(x, y)]
+
+    min_distance = board_side_max
 
     for row in range(board_h):
         for col in range(board_w):
@@ -120,93 +126,13 @@ def blokus_corners_heuristic(state, problem):
             if not is_diagonal_to_piece(row, col, board):
                 continue
 
+            max_distance = 0
+            for target in targets:
+                max_distance = max(max_distance, chess_distance((col, row), target))
 
+            min_distance = min(min_distance, max_distance)
 
-
-            if board.get_position(0, 0) == -1:
-                max_distance = max(max_distance, chessDistance((0, 0), (col, row)))
-
-            if board.get_position(0, board_h - 1) == -1:
-                max_distance = max(max_distance, chessDistance((0, board_h - 1), (col, row)))
-
-            if board.get_position(board_w - 1, 0) == -1:
-                max_distance = max(max_distance, chessDistance((board_w - 1, 0), (col, row)))
-
-            if board.get_position(board_w - 1, board_h - 1) == -1:
-                max_distance = max(max_distance, chessDistance((board_w - 1, board_h - 1), (col, row)))
-
-            #
-            # point_sum_distances = 0
-            #
-            # if board.get_position(0, 0) == -1:
-            #     point_sum_distances += chessDistance((0, 0), (col, row)) - 1
-            #
-            # if board.get_position(0, board_h - 1) == -1:
-            #     point_sum_distances += chessDistance((0, board_h - 1), (col, row)) - 1
-            #
-            # if board.get_position(board_w - 1, 0) == -1:
-            #     point_sum_distances += chessDistance((board_w - 1, 0), (col, row)) - 1
-            #
-            # if board.get_position(board_w - 1, board_h - 1) == -1:
-            #     point_sum_distances += chessDistance((board_w - 1, board_h - 1), (col, row)) - 1
-
-            #min_distance = min(point_sum_distances + 1, min_distance)
-
-    return max_distance
-
-
-def is_adj_to_piece(row, col, state):
-    flag = True
-
-    board = state.state
-    board_h = state.board_h
-    board_w = state.board_w
-    if col != 0:
-        flag = flag and board[row, col - 1] == -1
-
-    if col != board_w -1:
-        flag = flag and board[row, col + 1] == -1
-
-    if row != 0:
-        flag = flag and board[row - 1, col] == -1
-
-
-    if row != board_h - 1:
-        flag = flag and board[row + 1, col] == -1
-
-
-    return not flag
-
-
-def is_diagonal_to_piece(row, col, state):
-    board = state.state
-    board_h = state.board_h
-    board_w = state.board_w
-
-
-    if row != 0 and col != 0:
-        if board[row - 1, col - 1] == 0:
-            return True
-
-    if row != board_h - 1 and col != board_w - 1:
-        if board[row + 1, col + 1] == 0:
-            return True
-
-    if row != 0 and col != board_w - 1:
-        if board[row - 1, col + 1] == 0:
-            return True
-
-
-    if row != board_h - 1 and col != 0:
-        if board[row + 1, col - 1] == 0:
-            return True
-
-    return False
-
-
-def chessDistance(xy1, xy2):
-    "Returns the Manhattan distance between points xy1 and xy2"
-    return max(abs(xy1[0] - xy2[0]), abs(xy1[1] - xy2[1]))
+    return min_distance * len(targets)
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -264,11 +190,13 @@ def blokus_cover_heuristic(state, problem):
     board_w = board.board_w
     board_side_max = board.board_h + board.board_w
 
-    targets = problem.targets
+    targets = []
 
-    min_distance = board_side_max * len(targets)
+    for (x, y) in problem.targets:
+        if board.get_position(x, y) == -1:
+            targets += [(x, y)]
 
-    max_distance = 0
+    min_distance = board_side_max
 
     for row in range(board_h):
         for col in range(board_w):
@@ -279,15 +207,13 @@ def blokus_cover_heuristic(state, problem):
             if not is_diagonal_to_piece(row, col, board):
                 continue
 
+            max_distance = 0
+            for target in targets:
+                max_distance = max(max_distance, chess_distance((col, row), target))
 
-            for i, (x, y) in enumerate(targets):
-                if board.get_position(x, y) == -1:
-                    # point_sum_distances += chessDistance((x, y), (col, row)) - 1
-                    max_distance = max(max_distance, chessDistance((x, y), (col, row)))
+            min_distance = min(min_distance, max_distance)
 
-            #min_distance = min(point_sum_distances + 1, min_distance)
-
-    return  max_distance
+    return min_distance * len(targets)
 
 
 class ClosestLocationSearch:
@@ -416,3 +342,56 @@ class MiniContestSearch :
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
+
+
+def is_adj_to_piece(row, col, state):
+    flag = True
+
+    board = state.state
+    board_h = state.board_h
+    board_w = state.board_w
+    if col != 0:
+        flag = flag and board[row, col - 1] == -1
+
+    if col != board_w -1:
+        flag = flag and board[row, col + 1] == -1
+
+    if row != 0:
+        flag = flag and board[row - 1, col] == -1
+
+
+    if row != board_h - 1:
+        flag = flag and board[row + 1, col] == -1
+
+
+    return not flag
+
+
+def is_diagonal_to_piece(row, col, state):
+    board = state.state
+    board_h = state.board_h
+    board_w = state.board_w
+
+
+    if row != 0 and col != 0:
+        if board[row - 1, col - 1] == 0:
+            return True
+
+    if row != board_h - 1 and col != board_w - 1:
+        if board[row + 1, col + 1] == 0:
+            return True
+
+    if row != 0 and col != board_w - 1:
+        if board[row - 1, col + 1] == 0:
+            return True
+
+
+    if row != board_h - 1 and col != 0:
+        if board[row + 1, col - 1] == 0:
+            return True
+
+    return False
+
+
+def chess_distance(xy1, xy2):
+    return max(abs(xy1[0] - xy2[0]), abs(xy1[1] - xy2[1]))
