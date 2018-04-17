@@ -16,7 +16,7 @@ class ReflexAgent(Agent):
 
     def get_action(self, game_state):
         """
-        You do not need to change this method, but you're welcome to.a
+        You do not need to change this method, but you're welcome to.
 
         get_action chooses among the best options according to the evaluation function.
 
