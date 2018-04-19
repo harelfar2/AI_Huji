@@ -48,12 +48,18 @@ class ReflexAgent(Agent):
         # Useful information you can extract from a GameState (game_state.py)
 
         successor_game_state = current_game_state.generate_successor(action=action)
-        board = successor_game_state.board
+        cur_board = current_game_state.board
+        succ_board = successor_game_state.board
         max_tile = successor_game_state.max_tile
-        score = successor_game_state.score
+        diff = abs(cur_board - succ_board)
+        minus_diff = np.sum(diff)
 
-        "*** YOUR CODE HERE ***"
-        return score
+        num_of_free_spaces = 0
+        for x in np.nditer(succ_board):
+            if x == 0:
+                num_of_free_spaces += 1
+
+        return minus_diff * max_tile * num_of_free_spaces
 
 
 def score_evaluation_function(current_game_state):
