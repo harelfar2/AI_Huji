@@ -54,12 +54,27 @@ class ReflexAgent(Agent):
         diff = abs(cur_board - succ_board)
         minus_diff = np.sum(diff)
 
-        num_of_free_spaces = 0
-        for x in np.nditer(succ_board):
-            if x == 0:
-                num_of_free_spaces += 1
+        count = 0
 
-        return minus_diff * max_tile * num_of_free_spaces
+        for row in range(4):
+            for col in range(4):
+                count -= count_smaller_surround(col, row, succ_board, succ_board[row][col]) * succ_board[row][col]
+
+        return count
+
+def count_smaller_surround(col, row, board, tile):
+    surrounding = [(row,col - 1), (row, col + 1), (row - 1, col), (row + 1, col)]
+
+    count = 0
+    for s_tile in surrounding:
+        s_row, s_col = s_tile
+        try:
+            if board[s_row][s_col] < tile:
+                count += 1
+        except:
+            continue
+
+    return count
 
 
 def score_evaluation_function(current_game_state):
