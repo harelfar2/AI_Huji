@@ -131,7 +131,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
             Returns the successor game state after an agent takes an action
         """
 
-        return self.minimax(game_state, self.depth * 2 ,0)
+        return self.minimax(game_state, self.depth * 2 ,0)[2]
 
 
     def minimax(self, state, curr_depth, player):
@@ -168,7 +168,34 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         """*** YOUR CODE HERE ***"""
-        util.raiseNotDefined()
+        return self.alphabeta(game_state, self.depth * 2 ,0, -float('inf'), float('inf'))[2]
+
+
+    def alphabeta(self, state, curr_depth, player, alpha, beta):
+        if curr_depth == 0:
+            return (self.evaluation_function(state), state , Action.STOP)
+
+        best_value = -float('inf')
+        best_state = None
+        best_action = None
+        actions = state.get_legal_actions(player)
+        succ_states = [state.generate_successor(player, action) for action in actions]
+
+        for index, succ in enumerate(succ_states):
+            value, drop, drop2 = self.alphabeta(succ, curr_depth - 1, abs(1 - player), -beta, -alpha)
+            if player == 1:
+                value = -value
+
+            if value > best_value:
+                best_state = succ
+                best_value = value
+                best_action = actions[index]
+
+            alpha = max(alpha, value)
+            if alpha >= beta:
+                break
+
+        return (best_value, best_state, best_action)
 
 
 
