@@ -131,7 +131,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
             Returns the successor game state after an agent takes an action
         """
 
-        return self.minimax(game_state, self.depth * 2 ,0)
+        return self.minimax(game_state, self.depth * 2 ,0)[2]
 
 
     def minimax(self, state, curr_depth, player):
