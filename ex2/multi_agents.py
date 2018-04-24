@@ -282,8 +282,14 @@ def better_evaluation_function(current_game_state):
 
     DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    board = current_game_state.board
+    count = 0
+
+    for row in range(4):
+        for col in range(4):
+            count -= count_smaller_surround(col, row, board, board[row][col]) * board[row][col]
+
+    return count + current_game_state.score
 
 
 # Abbreviation
