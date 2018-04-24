@@ -131,31 +131,43 @@ class MinmaxAgent(MultiAgentSearchAgent):
             Returns the successor game state after an agent takes an action
         """
 
-        return self.minimax(game_state, self.depth * 2 ,0)[2]
-
+        return self.minimax(game_state, self.depth * 2 ,0)[1]
 
     def minimax(self, state, curr_depth, player):
         if curr_depth == 0:
-            return (self.evaluation_function(state), state , Action.STOP)
+            return self.evaluation_function(state), Action.STOP
 
-        best_value = -float('inf')
-        best_state = None
-        best_action = None
-        actions = state.get_legal_actions(player)
-        succ_states = [state.generate_successor(player, action) for action in actions]
+        if player == 0:  # max
+            best_value = -float('inf')
+            actions = state.get_legal_actions(player)
+            succ_states = [state.generate_successor(player, action) for action in actions]
 
-        for index, succ in enumerate(succ_states):
-            value, drop, drop2 = self.minimax(succ, curr_depth - 1, abs(1 - player))
-            if player == 1:
-                value = -value
+            if len(actions) == 0:
+                return self.evaluation_function(state), Action.STOP
+            best_action = actions[0]
 
-            if value > best_value:
-                best_state = succ
-                best_value = value
-                best_action = actions[index]
+            for index, succ in enumerate(succ_states):
+                value, drop = self.minimax(succ, curr_depth - 1, 1)
+                if value > best_value:
+                    best_value = value
+                    best_action = actions[index]
 
-        return (best_value, best_state, best_action)
+        else:  # min
+            best_value = float('inf')
+            actions = state.get_legal_actions(player)
+            succ_states = [state.generate_successor(player, action) for action in actions]
 
+            if len(actions) == 0:
+                return self.evaluation_function(state), Action.STOP
+            best_action = actions[0]
+
+            for index, succ in enumerate(succ_states):
+                value, drop = self.minimax(succ, curr_depth - 1, 0)
+                if value < best_value:
+                    best_value = value
+                    best_action = actions[index]
+
+        return best_value, best_action
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -167,35 +179,53 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        """*** YOUR CODE HERE ***"""
-        return self.alphabeta(game_state, self.depth * 2 ,0, -float('inf'), float('inf'))[2]
+        return self.alpha_beta(game_state, self.depth * 2, 0 , -float('inf'), float('inf'))[1]
 
-
-    def alphabeta(self, state, curr_depth, player, alpha, beta):
+    def alpha_beta(self, state, curr_depth, player, alpha, beta):
         if curr_depth == 0:
-            return (self.evaluation_function(state), state , Action.STOP)
+            return self.evaluation_function(state), Action.STOP
 
-        best_value = -float('inf')
-        best_state = None
-        best_action = None
-        actions = state.get_legal_actions(player)
-        succ_states = [state.generate_successor(player, action) for action in actions]
+        if player == 0: # max
+            best_value = -float('inf')
+            actions = state.get_legal_actions(player)
+            succ_states = [state.generate_successor(player, action) for action in actions]
 
-        for index, succ in enumerate(succ_states):
-            value, drop, drop2 = self.alphabeta(succ, curr_depth - 1, abs(1 - player), -beta, -alpha)
-            if player == 1:
-                value = -value
+            if len(actions) == 0:
+                return self.evaluation_function(state), Action.STOP
+            best_action = actions[0]
 
-            if value > best_value:
-                best_state = succ
-                best_value = value
-                best_action = actions[index]
+            for index, succ in enumerate(succ_states):
+                value, drop = self.alpha_beta(succ, curr_depth - 1, 1, alpha, beta)
+                if value > best_value:
+                    best_value = value
+                    best_action = actions[index]
 
-            alpha = max(alpha, value)
-            if alpha >= beta:
-                break
+                if value >= beta:
+                    return best_value, best_action
 
-        return (best_value, best_state, best_action)
+                alpha = max(alpha, value)
+
+        else: # min
+            best_value = float('inf')
+            actions = state.get_legal_actions(player)
+            succ_states = [state.generate_successor(player, action) for action in actions]
+
+            if len(actions) == 0:
+                return self.evaluation_function(state), Action.STOP
+            best_action = actions[0]
+
+            for index, succ in enumerate(succ_states):
+                value, drop = self.alpha_beta(succ, curr_depth - 1, 0, alpha, beta)
+                if value < best_value:
+                    best_value = value
+                    best_action = actions[index]
+
+                if value <= alpha:
+                    return (best_value, best_action)
+
+                beta = min(beta, value)
+
+        return best_value, best_action
 
 
 
@@ -211,11 +241,39 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         The opponent should be modeled as choosing uniformly at random from their
         legal moves.
         """
-        """*** YOUR CODE HERE ***"""
-        util.raiseNotDefined()
+        return self.expectimax(game_state, self.depth * 2, 0)[1]
 
+    def expectimax(self, state, curr_depth, player):
+        if curr_depth == 0:
+            return self.evaluation_function(state), Action.STOP
 
+        if player == 0: # max
+            best_value = -float('inf')
+            actions = state.get_legal_actions(player)
+            succ_states = [state.generate_successor(player, action) for action in actions]
 
+            if len(actions) == 0:
+                return self.evaluation_function(state), Action.STOP
+            best_action = actions[0]
+
+            for index, succ in enumerate(succ_states):
+                value, drop = self.expectimax(succ, curr_depth - 1, 1,)
+                if value > best_value:
+                    best_value = value
+                    best_action = actions[index]
+
+        else: # min
+            actions = state.get_legal_actions(player)
+            succ_states = [state.generate_successor(player, action) for action in actions]
+
+            if len(actions) == 0:
+                return self.evaluation_function(state), Action.STOP
+
+            best_action = None
+            values = [self.expectimax(succ, curr_depth - 1, 0)[0] * (1/len(succ_states))for succ in succ_states]
+            best_value = sum(values)
+
+        return best_value, best_action
 
 
 def better_evaluation_function(current_game_state):
