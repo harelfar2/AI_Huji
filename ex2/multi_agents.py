@@ -279,21 +279,23 @@ def better_evaluation_function(current_game_state):
                [14, 9,  6, 1],
                [15, 8,  7, 0]]
 
-    if max_tile >= 64 and max_tile != board[3][0]:
+    if max_tile >= 16 and max_tile != board[3][0]:
         for row in reversed(range(3)):
-            if board[row][0] < board[row+1][0]:
+            if 0 < board[row][0] <= board[row+1][0]:
                 penalty += max_tile
         weigths = [[3, 2, 1, 0],
                    [4, 3, 2, 1],
                    [5, 4, 3, 2],
                    [6, 5, 4, 3]]
 
+
+
     empty_tiles = 16
     score = max_tile
     for row in range(4):
         for col in range(4):
             if board[row][col] != 0:
-                penalty += count_smaller_surround(row, col, board) * board[row][col]
+                penalty += (count_smaller_surround(row, col, board) *(board[row][col]))
                 #penalty += count_neighbors_difference(row, col, board) * log(board[row][col], 2)
                 empty_tiles -= 1
                 score += weigths[row][col] * board[row][col]
