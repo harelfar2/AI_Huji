@@ -6,9 +6,9 @@ tkGAME - all-in-one Game library for Tkinter
 
 Gabriele Cirulli's 2048 puzzle game
 
-Python3-Tkinter port by Raphaël Seban <motus@laposte.net>
+Python3-Tkinter port by Raphaֳ«l Seban <motus@laposte.net>
 
-Copyright (c) 2014+ Raphaël Seban for the present code
+Copyright (c) 2014+ Raphaֳ«l Seban for the present code
 
 This program is free software: you can redistribute it and/or
 modify it under the terms of the GNU General Public License as
@@ -160,7 +160,7 @@ class GabrieleCirulli2048GraphicsDisplay(TK.Tk):
     r"""
     Gabriele Cirulli's 2048 puzzle game;
 
-    Python3-Tkinter port by Raphaël Seban;
+    Python3-Tkinter port by Raphaֳ«l Seban;
     """
 
     def __init__(self, new_game_callback, quit_game_callback, human_agent):

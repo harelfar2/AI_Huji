@@ -2,6 +2,7 @@ import numpy as np
 import abc
 import util
 from game import Agent, Action
+from math import log
 
 
 class ReflexAgent(Agent):
@@ -61,20 +62,6 @@ class ReflexAgent(Agent):
                 count -= count_smaller_surround(col, row, succ_board, succ_board[row][col]) * succ_board[row][col]
 
         return count
-
-def count_smaller_surround(col, row, board, tile):
-    surrounding = [(row,col - 1), (row, col + 1), (row - 1, col), (row + 1, col)]
-
-    count = 0
-    for s_tile in surrounding:
-        s_row, s_col = s_tile
-        try:
-            if board[s_row][s_col] < tile:
-                count += 1
-        except:
-            continue
-
-    return count
 
 
 def score_evaluation_function(current_game_state):
@@ -283,14 +270,70 @@ def better_evaluation_function(current_game_state):
     DESCRIPTION: <write something here so we know what you did>
     """
     board = current_game_state.board
-    count = 0
+    max_tile = current_game_state.max_tile
+    penalty = 0
 
+
+    weigths = [[12, 11, 4, 3],
+               [13, 10, 5, 2],
+               [14, 9,  6, 1],
+               [15, 8,  7, 0]]
+
+    if max_tile >= 64 and max_tile != board[3][0]:
+        penalty = max_tile
+        weigths = [[3, 2, 1, 0],
+                   [4, 3, 2, 1],
+                   [5, 4, 3, 2],
+                   [6, 5, 4, 3]]
+
+
+
+    empty_tiles = 16
+    score = max_tile
     for row in range(4):
         for col in range(4):
-            count -= count_smaller_surround(col, row, board, board[row][col]) * board[row][col]
+            if board[row][col] != 0:
+                penalty += (count_smaller_surround(row, col, board) * log(board[row][col], 2))
+                #penalty += count_neighbors_difference(row, col, board) * log(board[row][col], 2)
+                empty_tiles -= 1
+                score += weigths[row][col] * board[row][col]
 
-    return count + current_game_state.score
 
+    #print("max tile:", max_tile,"empty_tiles:",empty_tiles, "penalty:",penalty, "score:", score)
+    #print(type(penalty))
+
+    return score - penalty
+
+
+def count_smaller_surround(row, col, board):
+    surrounding = [(row,col - 1), (row, col + 1), (row - 1, col), (row + 1, col)]
+    tile = board[row][col]
+    count = 0
+    for s_tile in surrounding:
+        s_row, s_col = s_tile
+        try:
+            if board[s_row][s_col] < tile:
+                count += 1
+        except:
+            continue
+
+    return count
+
+
+def count_neighbors_difference(row, col, board):
+    tile = board[row][col]
+    surrounding = [(row, col - 1), (row, col + 1), (row - 1, col), (row + 1, col)]
+
+    sum = 0
+    for (s_row, s_col) in surrounding:
+        try:
+            sum += abs(tile - board[s_row][s_col])
+        except:
+            continue
+
+    return sum
 
 # Abbreviation
 better = better_evaluation_function
+
+
