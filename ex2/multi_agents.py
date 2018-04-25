@@ -280,7 +280,9 @@ def better_evaluation_function(current_game_state):
                [15, 8,  7, 0]]
 
     if max_tile >= 64 and max_tile != board[3][0]:
-        penalty = max_tile
+        for row in reversed(range(3)):
+            if board[row][0] < board[row+1][0]:
+                penalty += max_tile
         weigths = [[3, 2, 1, 0],
                    [4, 3, 2, 1],
                    [5, 4, 3, 2],
