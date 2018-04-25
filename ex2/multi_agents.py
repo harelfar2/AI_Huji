@@ -49,19 +49,15 @@ class ReflexAgent(Agent):
         # Useful information you can extract from a GameState (game_state.py)
 
         successor_game_state = current_game_state.generate_successor(action=action)
-        cur_board = current_game_state.board
         succ_board = successor_game_state.board
-        max_tile = successor_game_state.max_tile
-        diff = abs(cur_board - succ_board)
-        minus_diff = np.sum(diff)
 
-        count = 0
+        penalty = 0
 
         for row in range(4):
             for col in range(4):
-                count -= count_smaller_surround(col, row, succ_board, succ_board[row][col]) * succ_board[row][col]
+                penalty -= count_smaller_surround(row, col, succ_board) * succ_board[row][col]
 
-        return count
+        return penalty
 
 
 def score_evaluation_function(current_game_state):
@@ -118,7 +114,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
             Returns the successor game state after an agent takes an action
         """
 
-        return self.minimax(game_state, self.depth * 2 ,0)[1]
+        return self.minimax(game_state, self.depth * 2, 0)[1]
 
     def minimax(self, state, curr_depth, player):
         if curr_depth == 0:
@@ -166,13 +162,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        return self.alpha_beta(game_state, self.depth * 2, 0 , -float('inf'), float('inf'))[1]
+        return self.alpha_beta(game_state, self.depth * 2, 0, -float('inf'), float('inf'))[1]
 
     def alpha_beta(self, state, curr_depth, player, alpha, beta):
         if curr_depth == 0:
             return self.evaluation_function(state), Action.STOP
 
-        if player == 0: # max
+        if player == 0:  # max
             best_value = -float('inf')
             actions = state.get_legal_actions(player)
             succ_states = [state.generate_successor(player, action) for action in actions]
@@ -192,7 +188,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
                 alpha = max(alpha, value)
 
-        else: # min
+        else:  # min
             best_value = float('inf')
             actions = state.get_legal_actions(player)
             succ_states = [state.generate_successor(player, action) for action in actions]
@@ -215,7 +211,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return best_value, best_action
 
 
-
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
     Your expectimax agent (question 4)
@@ -234,7 +229,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         if curr_depth == 0:
             return self.evaluation_function(state), Action.STOP
 
-        if player == 0: # max
+        if player == 0:  # max
             best_value = -float('inf')
             actions = state.get_legal_actions(player)
             succ_states = [state.generate_successor(player, action) for action in actions]
@@ -249,7 +244,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                     best_value = value
                     best_action = actions[index]
 
-        else: # min
+        else:  # min
             actions = state.get_legal_actions(player)
             succ_states = [state.generate_successor(player, action) for action in actions]
 
@@ -267,12 +262,11 @@ def better_evaluation_function(current_game_state):
     """
     Your extreme 2048 evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: README file
     """
     board = current_game_state.board
     max_tile = current_game_state.max_tile
     penalty = 0
-
 
     weigths = [[12, 11, 4, 3],
                [13, 10, 5, 2],
@@ -287,8 +281,6 @@ def better_evaluation_function(current_game_state):
                    [4, 3, 2, 1],
                    [5, 4, 3, 2],
                    [6, 5, 4, 3]]
-
-
 
     empty_tiles = 16
     score = max_tile
@@ -308,7 +300,7 @@ def better_evaluation_function(current_game_state):
 
 
 def count_smaller_surround(row, col, board):
-    surrounding = [(row,col - 1), (row, col + 1), (row - 1, col), (row + 1, col)]
+    surrounding = [(row, col - 1), (row, col + 1), (row - 1, col), (row + 1, col)]
     tile = board[row][col]
     count = 0
     for s_tile in surrounding:
