@@ -288,14 +288,12 @@ def better_evaluation_function(current_game_state):
                    [5, 4, 3, 2],
                    [6, 5, 4, 3]]
 
-
-
     empty_tiles = 16
     score = max_tile
     for row in range(4):
         for col in range(4):
             if board[row][col] != 0:
-                penalty += (count_smaller_surround(row, col, board) * log(board[row][col], 2))
+                penalty += count_smaller_surround(row, col, board) * board[row][col]
                 #penalty += count_neighbors_difference(row, col, board) * log(board[row][col], 2)
                 empty_tiles -= 1
                 score += weigths[row][col] * board[row][col]
