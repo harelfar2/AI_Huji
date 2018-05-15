@@ -233,40 +233,27 @@ def independent_pair(a1, a2):
 
     """
 
-    pair = a1, a2
-    for i in range(2):
-        for pre in pair[0].get_pre():
-            if pair[1].is_neg_effect(pre):
-                return False
+    a1_pre = a1.get_pre()
+    a1_add = a1.get_add()
+    a1_delete = a1.get_delete()
 
-        for added in pair[0].get_add():
-            if pair[1].is_neg_effect(added):
-                return False
-        pair = a2, a1
+    a2_pre = a2.get_pre()
+    a2_add = a2.get_add()
+    a2_delete = a2.get_delete()
+
+    # Inconsistent effects
+    if not len(intersection(a1_add, a2_delete)) == 0:
+        return False
+    if not len(intersection(a2_add, a1_delete)) == 0:
+        return False
+
+    # Interference
+    if not len(intersection(a1_pre, a2_delete)) == 0:
+        return False
+    if not len(intersection(a2_pre, a1_delete)) == 0:
+        return False
 
     return True
-
-    # a1_pre = a1.get_pre()
-    # a1_add = a1.get_add()
-    # a1_delete = a1.get_delete()
-    #
-    # a2_pre = a2.get_pre()
-    # a2_add = a2.get_add()
-    # a2_delete = a2.get_delete()
-    #
-    # # Inconsistent effects
-    # if not len(intersection(a1_add, a2_delete)) == 0:
-    #     return False
-    # if not len(intersection(a2_add, a1_delete)) == 0:
-    #     return False
-    #
-    # # Interference
-    # if not len(intersection(a1_pre, a2_delete)) == 0:
-    #     return False
-    # if not len(intersection(a2_pre, a1_delete)) == 0:
-    #     return False
-    #
-    # return True
 
 
 if __name__ == '__main__':

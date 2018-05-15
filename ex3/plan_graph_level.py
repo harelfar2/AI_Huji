@@ -70,7 +70,7 @@ class PlanGraphLevel(object):
         Updates the mutex set in self.action_layer,
         given the mutex proposition from the previous layer.
         current_layer_actions are the actions in the current action layer
-        You might want to use this function:
+        You might want to use this function:f
         self.actionLayer.add_mutex_actions(action1, action2)
         adds the pair (action1, action2) to the mutex set in the current action layer
         Note that an action is *not* mutex with itself
@@ -100,7 +100,7 @@ class PlanGraphLevel(object):
 
         for action in current_layer_actions:
             for add_prop in action.get_add():
-                props[add_prop] += [action]
+                props[add_prop.get_name()] += [action]
 
 
         for add_prop in props:
@@ -174,7 +174,6 @@ def have_competing_needs(a1, a2, mutex_props):
     """
     a1_pre = a1.get_pre()
     a2_pre = a2.get_pre()
-
 
     for p in a1_pre:
         for q in a2_pre:
