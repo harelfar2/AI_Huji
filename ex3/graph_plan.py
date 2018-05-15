@@ -250,6 +250,7 @@ def independent_pair(a1, a2):
         return False
     if not len(intersection(a2_pre, a1_delete)) == 0:
         return False
+
     return True
 
 
