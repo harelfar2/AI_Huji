@@ -38,12 +38,17 @@ class PlanningProblem:
 
     def get_start_state(self):
         "*** YOUR CODE HERE ***"
+        return self.initialState
 
     def is_goal_state(self, state):
         """
         Hint: you might want to take a look at goal_state_not_in_prop_payer function
         """
-        "*** YOUR CODE HERE ***"
+        prep = state
+        for goal_p in self.goal:
+            if goal_p not in prep:
+                return False
+        return True
 
     def get_successors(self, state):
         """
