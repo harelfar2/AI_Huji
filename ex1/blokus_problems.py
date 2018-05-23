@@ -101,9 +101,10 @@ class BlokusCornersProblem(SearchProblem):
 
 
 def blokus_corners_heuristic(state, problem):
-    board = state[0]
+    board = state # changed
     if problem.is_goal_state(board):
         return 0
+
     board_h = board.board_h
     board_w = board.board_w
     board_side_max = board.board_h + board.board_w
@@ -114,6 +115,10 @@ def blokus_corners_heuristic(state, problem):
     for (x, y) in corners:
         if board.get_position(x, y) == -1:
             targets += [(x, y)]
+
+    for (x,y) in targets:
+        if is_adj_to_piece(y, x, board):
+            return board_side_max * len(corners)
 
     max_distance = 0
 
@@ -132,7 +137,7 @@ def blokus_corners_heuristic(state, problem):
 
             max_distance = max(min_distance, max_distance)
 
-    return max_distance * len(targets)
+    return max_distance # changed
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -182,7 +187,7 @@ class BlokusCoverProblem(SearchProblem):
 
 
 def blokus_cover_heuristic(state, problem):
-    board = state[0]
+    board = state # changed
 
     if problem.is_goal_state(board):
         return 0
@@ -196,6 +201,10 @@ def blokus_cover_heuristic(state, problem):
     for (x, y) in problem.targets:
         if board.get_position(x, y) == -1:
             targets += [(x, y)]
+
+    for (x,y) in targets:
+        if is_adj_to_piece(y, x, board):
+            return board_side_max * len(problem.targets)
 
     max_distance = 0
 
@@ -214,7 +223,7 @@ def blokus_cover_heuristic(state, problem):
 
             max_distance = max(min_distance, max_distance)
 
-    return max_distance * len(targets)
+    return max_distance # changed
 
 
 class ClosestLocationSearch:
@@ -286,7 +295,7 @@ class ClosestLocationSearch:
 
             self.expanded += problem.expanded
 
-            print("completed target", cur_target, "with", problem.expanded, "nodes")
+            #print("completed target", cur_target, "with", problem.expanded, "nodes")
 
         return backtrace
 
@@ -320,7 +329,7 @@ def a_star_search_closest(problem, heuristic, board):
         successors = problem.get_successors(current_node.state)
         for succ in successors:
             g = succ[2] + current_node.cost
-            h = heuristic(succ, problem)
+            h = heuristic(succ[0], problem) # changed
             node = SearchNode(succ[0], succ[1], current_node, g)
 
             fringe.push(node, g + h)

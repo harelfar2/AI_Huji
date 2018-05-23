@@ -71,6 +71,7 @@ class PriorityQueue:
     def __init__(self):
         self.heap = []
         self.init = False
+        self.size = 1
 
     def push(self, item, priority):
         if not self.init:
@@ -81,8 +82,10 @@ class PriorityQueue:
                 item.__class__.__lt__ = lambda x, y: (True)
         pair = (priority, item)
         heapq.heappush(self.heap, pair)
+        self.size+=1
 
     def pop(self):
+        self.size-=1
         (priority, item) = heapq.heappop(self.heap)
         return item
 

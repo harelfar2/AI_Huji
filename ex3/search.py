@@ -188,9 +188,6 @@ def a_star_search(problem, heuristic=null_heuristic):
     while fringe:
         current_node = fringe.pop()
 
-        #if problem.expanded % 1000 == 0:
-            #print(problem.expanded)
-
         if problem.is_goal_state(current_node.state):
             return get_path(current_node)
 
@@ -202,13 +199,8 @@ def a_star_search(problem, heuristic=null_heuristic):
         successors = problem.get_successors(current_node.state)
         for succ in successors:
             g = succ[2] + current_node.cost
-            h = heuristic(succ[0], problem) # changed
+            h = heuristic(succ, problem)
             node = SearchNode(succ[0], succ[1], current_node, g)
-
-            #print("h:", h)
-            #print("board:")
-            #print(node.state)
-            #print("\n\n\n\n")
 
             fringe.push(node, g + h)
 
