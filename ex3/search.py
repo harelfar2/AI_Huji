@@ -199,7 +199,7 @@ def a_star_search(problem, heuristic=null_heuristic):
         successors = problem.get_successors(current_node.state)
         for succ in successors:
             g = succ[2] + current_node.cost
-            h = heuristic(succ, problem)
+            h = heuristic(succ[0], problem)
             node = SearchNode(succ[0], succ[1], current_node, g)
 
             fringe.push(node, g + h)
