@@ -101,7 +101,7 @@ class BlokusCornersProblem(SearchProblem):
 
 
 def blokus_corners_heuristic(state, problem):
-    board = state # changed
+    board = state 
     if problem.is_goal_state(board):
         return 0
 
@@ -137,7 +137,7 @@ def blokus_corners_heuristic(state, problem):
 
             max_distance = max(min_distance, max_distance)
 
-    return max_distance # changed
+    return max_distance 
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -187,7 +187,7 @@ class BlokusCoverProblem(SearchProblem):
 
 
 def blokus_cover_heuristic(state, problem):
-    board = state # changed
+    board = state 
 
     if problem.is_goal_state(board):
         return 0
@@ -223,7 +223,7 @@ def blokus_cover_heuristic(state, problem):
 
             max_distance = max(min_distance, max_distance)
 
-    return max_distance # changed
+    return max_distance 
 
 
 class ClosestLocationSearch:
@@ -329,7 +329,7 @@ def a_star_search_closest(problem, heuristic, board):
         successors = problem.get_successors(current_node.state)
         for succ in successors:
             g = succ[2] + current_node.cost
-            h = heuristic(succ[0], problem) # changed
+            h = heuristic(succ[0], problem) 
             node = SearchNode(succ[0], succ[1], current_node, g)
 
             fringe.push(node, g + h)
