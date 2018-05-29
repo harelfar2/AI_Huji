@@ -6,18 +6,18 @@ from pgparser import PgParser
 from action import Action
 
 try:
-    from search import SearchProblem
-    from search import a_star_search
-
-except:
     from CPF.search import SearchProblem
     from CPF.search import a_star_search
+
+except:
+    from search import SearchProblem
+    from search import a_star_search
 
 
 class PlanningProblem:
     def __init__(self, domain_file, problem_file):
         """
-        Constructor
+        Constructorf
         """
         p = PgParser(domain_file, problem_file)
         self.actions, self.propositions = p.parse_actions_and_propositions()
@@ -29,6 +29,7 @@ class PlanningProblem:
         self.initialState = frozenset(initial_state)
         self.goal = frozenset(goal)
 
+
         self.create_noops()
         # creates noOps that are used to propagate existing propositions from one layer to the next
 
@@ -37,7 +38,6 @@ class PlanningProblem:
         self.expanded = 0
 
     def get_start_state(self):
-        "*** YOUR CODE HERE ***"
         return self.initialState
 
     def is_goal_state(self, state):
@@ -64,7 +64,25 @@ class PlanningProblem:
         Note that a state *must* be hashable!! Therefore, you might want to represent a state as a frozenset
         """
         self.expanded += 1
-        "*** YOUR CODE HERE ***"
+        cost = 1
+
+        succs = []
+
+        for action in self.actions:
+            if action.all_preconds_in_list(state) and not action.is_noop():
+                new_props = []
+                for prop in state:
+                    if not action.is_neg_effect(prop):
+                        new_props.append(prop)
+
+                for added in action.get_add():
+                    if added not in new_props:
+                        new_props.append(added)
+
+                succs += [(new_props, action, cost)]
+
+        return succs
+
 
     @staticmethod
     def get_cost_of_actions( actions):
