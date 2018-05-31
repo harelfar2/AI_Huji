@@ -18,3 +18,4 @@ class Action:
         self.x = x
         self.y = y
         self.value = value
+        self.actions_count = 0
