@@ -168,6 +168,9 @@ def level_sum(state, planning_problem):
     level.set_proposition_layer(initial_prop_layer)
     graph.append(level)
 
+    if planning_problem.is_goal_state(level.get_proposition_layer().get_propositions()):
+        return 0
+
     while len(goals) != 0:
 
         if is_fixed(graph, level_count):
