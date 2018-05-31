@@ -102,7 +102,6 @@ class PlanGraphLevel(object):
             for add_prop in action.get_add():
                 props[add_prop.get_name()] += [action]
 
-
         for add_prop in props:
             prop = Proposition(add_prop)
             prop.set_producers(props[add_prop])
@@ -150,7 +149,10 @@ class PlanGraphLevel(object):
         You don't have to use this function
         """
         previous_layer_proposition = previous_layer.get_proposition_layer()
-        "*** YOUR CODE HERE ***"
+
+        self.update_action_layer(previous_layer_proposition)
+
+        self.update_proposition_layer()
 
 
 def mutex_actions(a1, a2, mutex_props):
@@ -198,8 +200,8 @@ def mutex_propositions(prop1, prop2, mutex_actions_list):
         for a2 in prod2:
             if not Pair(a1, a2) in mutex_actions_list:
                 return False
-
     return True
+
 
 def mutex_in_prev_layer(action, layer):
     pre1 = action.get_pre()
