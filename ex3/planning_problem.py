@@ -8,11 +8,9 @@ from action import Action
 try:
     from CPF.search import SearchProblem
     from CPF.search  import a_star_search
-    print("CPF")
 except:
     from search import SearchProblem
     from search  import a_star_search
-    print("search")
 
 
 class PlanningProblem:
