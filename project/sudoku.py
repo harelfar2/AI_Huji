@@ -1,62 +1,90 @@
 from board import Board
 from functools import reduce
 import numpy as np
-import sys
+
 from util import EMPTY_VALUE, Action
 import time
+from datetime import datetime
 from solvers import StupidSolver
 
 
 class Sudoku:
 
-    def __init__(self, filename, display_enabled = True, print = False, solver = StupidSolver()):
+    def __init__(self, filename, solver_type = 'stupid', display_enabled = True, print = False):
         self.__grid, self.__read_only_tiles = self.__parse_file(filename)
-        self._full_tiles = self.__read_only_tiles[:]
-
-        self.__solver = solver
+        if solver_type == 'stupid':
+            self.__solver = StupidSolver(self)
 
         self.__print_enabled = print
         self.__display_enabled = display_enabled
         if display_enabled:
             self.__board = Board(self.__grid)
 
-    def insert(self, x, y, value):
+    def play(self):
+        start = datetime.now()
+        actions_queue = self.__solver.solve()
+        end = datetime.now()
+        total = end - start
+        print("got solution after", total.microseconds, "microseconds")
+        action_counter = 0
+        quit_game = False
+
+        while actions_queue:
+            action = actions_queue.popleft()
+            if action.id == Action.INSERT:
+                self.__insert(action.x, action.y, action.value)
+            elif action.id == Action.DELETE:
+                self.__delete(action.x, action.y)
+            elif action.id == Action.QUIT:
+                quit_game = True
+                break
+
+            if not self.__display_enabled and self.__print_enabled:
+                print("\n",self)
+
+            action_counter += 1
+
+        if not quit_game:
+            print("solved with", action_counter, "action" + ["s", ""][action_counter == 1])
+        else:
+            print("quit after", action_counter, "action" + ["s", ""][action_counter == 1])
+
+        time.sleep(5)
+
+    def __insert(self, x, y, value):
         """
         puts value in the grid at tile (x,y)
         """
         self.__grid[y][x] = value
-        self._full_tiles += [(x,y)]
         if self.__display_enabled:
             self.__board.insert(y, x, value)
 
-    def delete(self, x, y):
+    def __delete(self, x, y):
         """
         deletes the value in the grid at tile (x,y)
         """
         self.__grid[y][x] = EMPTY_VALUE
-        self._full_tiles.remove((x, y))
         if self.__display_enabled:
             self.__board.insert(y, x, EMPTY_VALUE)
 
-
-    def get_value(self, x, y):
-        return self.__grid[y][x]
-
-    def get_row(self, x):
+    @staticmethod
+    def get_row(grid, x):
         """
         returns a list representing the row of tile (x,y) in the grid
         """
-        row = self.__grid[x, :]
+        row = grid[x, :]
         return np.delete(row, np.where(row == EMPTY_VALUE))
 
-    def get_column(self, y):
+    @staticmethod
+    def get_column(grid, y):
         """
         returns a list representing the column of tile (x,y) in the grid
         """
-        col = self.__grid[:, y]
+        col = grid[:, y]
         return np.delete(col, np.where(col == EMPTY_VALUE))
 
-    def get_block(self, x, y):
+    @staticmethod
+    def get_block(grid, x, y):
         """
         returns a list representing the 3x3 block of tile (x,y) in the grid
         """
@@ -74,88 +102,54 @@ class Sudoku:
         else:
             s_y = slice(6, 9)
 
-        block = self.__grid[s_y, s_x].reshape(9)
+        block = grid[s_y, s_x].reshape(9)
         return np.delete(block, np.where(block == EMPTY_VALUE))
 
-    def get_legal_values(self, x, y):
+    @staticmethod
+    def get_legal_values(grid, x, y):
         """
         gets all possible legal values in the grid at tile (x,y)
         """
-        all_values = [i for i in range(1,10)]
+        all_values = [i for i in range(1, 10)]
 
-        row_values = self.get_row(y)
-        col_values = self.get_column(x)
-        block_values = self.get_block(x, y)
+        row_values = Sudoku.get_row(grid, y)
+        col_values = Sudoku.get_column(grid, x)
+        block_values = Sudoku.get_block(grid, x, y)
 
         curr_values = reduce(np.union1d, (row_values, col_values, block_values))
         return np.setdiff1d(all_values, curr_values)
 
-    def get_grid(self):
-        return self.__grid
-
-    def get_full_tiles(self):
-        return self._full_tiles
-
-    def get_full_tiles_count(self):
-        return len(self._full_tiles)
-
-    def get_read_only(self):
-        return self.__read_only_tiles
-
-    def play(self):
-
-        action_counter = 0
-        solved = self.is_complete()
-
-        while not solved:
-            action = self.__solver.get_action(self)
-            if action.id == Action.INSERT:
-                self.insert(action.x, action.y, action.value)
-            elif action.id == Action.DELETE:
-                self.delete(action.x, action.y)
-            elif action.id == Action.QUIT:
-                self.__quit()
-                break
-
-            if not self.__display_enabled and self.__print_enabled:
-                print("\n",self)
-
-            action_counter += 1
-            solved = self.is_complete()
-
-        if solved:
-            print("solved with", action_counter, "action" + ["s", ""][action_counter == 1])
-        else:
-            print("quit after", action_counter, "action" + ["s", ""][action_counter == 1])
-
-        while(True):
-            continue
-
-    def is_complete(self):
-        if self.get_full_tiles_count() != 81:
+    @staticmethod
+    def is_complete(grid):
+        if np.any(grid == EMPTY_VALUE):
             return False
 
         # check rows
         for i in range(9):
-            if len(set(self.get_row(i))) != 9:
+            if len(set(Sudoku.get_row(grid, i))) != 9:
                 return False
 
         # check columns
         for i in range(9):
-            if len(set(self.get_column(i))) != 9:
+            if len(set(Sudoku.get_column(grid, i))) != 9:
                 return False
-        #check blocks
-        block_indeces = [(0, 0), (0, 3), (0, 6), (3, 0), (3, 3), (3, 6), (6, 0), (6, 3), (6, 6)]
-        for y,x in block_indeces:
-            if len(set(self.get_block(x,y))) != 9:
+
+        # check blocks
+        block_indices = [(0, 0), (0, 3), (0, 6), (3, 0), (3, 3), (3, 6), (6, 0), (6, 3), (6, 6)]
+        for y, x in block_indices:
+            if len(set(Sudoku.get_block(grid, x, y))) != 9:
                 return False
 
         return True
 
-    def __quit(self):
-        print("QUIT")
+    def get_grid(self):
+        return self.__grid
 
-    def __parse_file(self, filename):
+    def get_read_only(self):
+        return self.__read_only_tiles
+
+    @staticmethod
+    def __parse_file(filename):
         with open(filename) as f:
             line = f.readlines()[0]
         values = []

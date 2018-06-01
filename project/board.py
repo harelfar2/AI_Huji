@@ -50,7 +50,6 @@ class Board:
         time.sleep(0.5)
 
 
-
 class Tile:
 
     SQUARE_SIZE = 40
