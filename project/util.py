@@ -1,6 +1,20 @@
 EMPTY_VALUE = 0
 delay = 0.005
 
+def grid_to_string(grid):
+    string = ""
+    for i in range(9):
+        if i in [3, 6]:
+            string += '---+---+---\n'
+        for j in range(9):
+            if j in [3, 6]:
+                string += '|'
+            string += str(grid[i][j])
+        string += "\n"
+
+    return string
+
+
 class Action:
     INSERT = 1
     DELETE = 2

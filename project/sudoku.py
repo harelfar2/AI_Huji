@@ -2,10 +2,10 @@ from board import Board
 from functools import reduce
 import numpy as np
 
-from util import EMPTY_VALUE, Action
+from util import EMPTY_VALUE, Action, grid_to_string
 import time
 from datetime import datetime
-from solvers import StupidSolver
+from solvers import StupidSolver, BackTrackingSolver
 
 
 class Sudoku:
@@ -14,6 +14,8 @@ class Sudoku:
         self.__grid, self.__read_only_tiles = self.__parse_file(filename)
         if solver_type == 'stupid':
             self.__solver = StupidSolver(self)
+        if solver_type == 'backtracking':
+            self.__solver = BackTrackingSolver(self)
 
         self.__print_enabled = print
         self.__display_enabled = display_enabled
@@ -21,28 +23,37 @@ class Sudoku:
             self.__board = Board(self.__grid)
 
     def play(self):
-        start = datetime.now()
+        start = time.time()
         actions_queue = self.__solver.solve()
-        end = datetime.now()
+        end = time.time()
+
         total = end - start
-        print("got solution after", total.microseconds, "microseconds")
-        action_counter = 0
-        quit_game = False
+        print("got solution after", total, "seconds", flush=True)
 
-        while actions_queue:
-            action = actions_queue.popleft()
-            if action.id == Action.INSERT:
-                self.__insert(action.x, action.y, action.value)
-            elif action.id == Action.DELETE:
-                self.__delete(action.x, action.y)
-            elif action.id == Action.QUIT:
-                quit_game = True
-                break
+        if self.__display_enabled:
 
-            if not self.__display_enabled and self.__print_enabled:
-                print("\n",self)
+            action_counter = 0
+            quit_game = False
 
-            action_counter += 1
+            while actions_queue:
+                print("hi")
+                action = actions_queue.popleft()
+                if action.id == Action.INSERT:
+                    self.__insert(action.x, action.y, action.value)
+                elif action.id == Action.DELETE:
+                    self.__delete(action.x, action.y)
+                elif action.id == Action.QUIT:
+                    quit_game = True
+                    break
+
+                if not self.__display_enabled and self.__print_enabled:
+                    print("\n", self)
+                time.sleep(0.0001)
+                action_counter += 1
+        else:
+            action_counter = len(actions_queue)
+            quit_game = not self.__solver.is_solved
+            print(grid_to_string(self.__solver.grid))
 
         if not quit_game:
             print("solved with", action_counter, "action" + ["s", ""][action_counter == 1])
@@ -106,6 +117,20 @@ class Sudoku:
         return np.delete(block, np.where(block == EMPTY_VALUE))
 
     @staticmethod
+    def get_first_empty_cell(grid, read_only, x_start = 0, y_start = 0):
+        for y in range(y_start, 9):
+            for x in range(x_start, 9):
+                if grid[y][x] == EMPTY_VALUE and (x, y) not in read_only:
+                    return x, y
+
+        for y in range(0, 9):
+            for x in range(0, 9):
+                if grid[y][x] == EMPTY_VALUE and (x, y) not in read_only:
+                    return x, y
+
+        return -1, -1
+
+    @staticmethod
     def get_legal_values(grid, x, y):
         """
         gets all possible legal values in the grid at tile (x,y)
@@ -166,16 +191,6 @@ class Sudoku:
         return np.array(values).reshape(9,9), read_only
 
     def __str__(self):
-        string = ""
-        for i in range(9):
-            if i in [3, 6]:
-                string += '---+---+---\n'
-            for j in range(9):
-                if j in [3, 6]:
-                    string += '|'
-                string += str(self.__grid[i][j])
-            string += "\n"
-
-        return string
+        return grid_to_string(self.__grid)
 
 
