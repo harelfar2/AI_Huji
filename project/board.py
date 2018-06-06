@@ -47,7 +47,7 @@ class Board:
         self.__graphic_grid[y_pos][x_pos] = new_value
         self.__tiles[x_pos][y_pos].update_value(new_value)
         pygame.display.update()
-        time.sleep(0.5)
+        time.sleep(util.delay)
 
 
 class Tile:
