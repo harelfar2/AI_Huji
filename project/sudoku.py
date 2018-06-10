@@ -36,7 +36,6 @@ class Sudoku:
             quit_game = False
 
             while actions_queue:
-                print("hi")
                 action = actions_queue.popleft()
                 if action.id == Action.INSERT:
                     self.__insert(action.x, action.y, action.value)
@@ -48,7 +47,6 @@ class Sudoku:
 
                 if not self.__display_enabled and self.__print_enabled:
                     print("\n", self)
-                time.sleep(0.0001)
                 action_counter += 1
         else:
             action_counter = len(actions_queue)
