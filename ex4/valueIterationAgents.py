@@ -42,15 +42,11 @@ class ValueIterationAgent(ValueEstimationAgent):
     for i in range(iterations):
         new_values = util.Counter()
         for state in states:
-            chosen_action = self.getPolicy(state)
+            chosen_action = self.getAction(state)
             if chosen_action is not None:
                 new_values[state] = self.getQValue(state, chosen_action)
 
         self.values = new_values
-
-
-
-    "*** YOUR CODE HERE ***"
 
   def getValue(self, state):
     """
@@ -75,20 +71,6 @@ class ValueIterationAgent(ValueEstimationAgent):
         q_value += probability * (reward + self.discount * value)
 
     return q_value
-
-  '''
-          total = 0
-        transStatesAndProbs = self.mdp.getTransitionStatesAndProbs(state, action)
-
-        for tranStateAndProb in transStatesAndProbs:
-            tstate = tranStateAndProb[0]
-            prob = tranStateAndProb[1]
-            reward = self.mdp.getReward(state, action, tstate)
-            value = self.getValue(tstate)
-            total += prob * (reward + self.discount * value)
-
-        return total
-  '''
 
   def getPolicy(self, state):
     """
