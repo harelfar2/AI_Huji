@@ -183,16 +183,15 @@ class CSPSolver(Solver):
         for value in legal_values:
             values_count = 0
             self.insert(x, y, value)
-
             for x_n,y_n in self.game.get_neighbors(x,y):
                 if self.get_value(x_n,y_n) == EMPTY_VALUE:
 
-                    neigbor_legal_values_count = len(self.game.get_legal_values(x_n,y_n))
+                    neighbor_legal_values_count = len(self.game.get_legal_values(self.grid,x_n,y_n))
 
-                    if neigbor_legal_values_count == 0:
+                    if neighbor_legal_values_count == 0:
                         values_count = np.inf # no way to chose it
                         break
-                    values_count += len(self.game.get_legal_values(x_n,y_n))
+                    values_count += len(self.game.get_legal_values(self.grid, x_n,y_n))
 
             if values_count > max_count:
                 max_count = values_count

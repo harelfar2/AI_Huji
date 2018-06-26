@@ -2,7 +2,7 @@ from board import Board
 from functools import reduce
 import numpy as np
 
-from util import EMPTY_VALUE, Action, grid_to_string, indexes_matrix
+from util import EMPTY_VALUE, Action, grid_to_string
 import time
 from solvers import StupidSolver, BackTrackingSolver, CSPSolver
 
@@ -148,24 +148,26 @@ class Sudoku:
 
     @staticmethod
     def get_neighbors(x, y):
-        row = [(j, y) for j in range(0,9)]
-        col = [(x, i) for i in range(0,9)]
+        row = [(j, y) for j in range(0, 9)]
+        col = [(x, i) for i in range(0, 9)]
 
         if 0 <= x < 3:
-            s_x = slice(0, 3)
+            s_x = range(0, 3)
         elif 3 <= x < 6:
-            s_x = slice(3, 6)
+            s_x = range(3, 6)
         else:
-            s_x = slice(6, 9)
+            s_x = range(6, 9)
 
         if 0 <= y < 3:
-            s_y = slice(0, 3)
+            s_y = range(0, 3)
         elif 3 <= y < 6:
-            s_y = slice(3, 6)
+            s_y = range(3, 6)
         else:
-            s_y = slice(6, 9)
-
-        block = indexes_matrix[s_y, s_x].reshape(9)
+            s_y = range(6, 9)
+        block = []
+        for i in s_x:
+            for j in s_y:
+                block.append((i, j))
 
         return row + col + block
 
