@@ -5,7 +5,7 @@ import numpy as np
 from util import EMPTY_VALUE, Action, grid_to_string
 import time
 from datetime import datetime
-from solvers import StupidSolver, BackTrackingSolver
+from solvers import StupidSolver, BackTrackingSolver, CSPSolver
 
 
 class Sudoku:
@@ -16,6 +16,10 @@ class Sudoku:
             self.__solver = StupidSolver(self)
         if solver_type == 'backtracking':
             self.__solver = BackTrackingSolver(self)
+        if solver_type == 'csp':
+            self.__solver = CSPSolver(self)
+
+
 
         self.__print_enabled = print
         self.__display_enabled = display_enabled
@@ -57,9 +61,6 @@ class Sudoku:
             print("solved with", action_counter, "action" + ["s", ""][action_counter == 1])
         else:
             print("quit after", action_counter, "action" + ["s", ""][action_counter == 1])
-
-        while True:
-            continue
 
     def __insert(self, x, y, value):
         """

@@ -3,6 +3,7 @@ from random import randint, shuffle
 from util import Action, EMPTY_VALUE
 from collections import deque
 import sys
+import numpy as np
 
 
 class Solver(object):
@@ -70,7 +71,6 @@ class StupidSolver(Solver):
         return self.actions_queue
 
 
-
 class BackTrackingSolver(Solver):
 
     def solve(self):
@@ -95,5 +95,70 @@ class BackTrackingSolver(Solver):
                 return True
             self.delete(x, y)
         return False
+
+
+class CSPSolver(Solver):
+    def solve(self):
+        if self.__recursive_csp_backtracking():
+            self.is_solved = True
+        return self.actions_queue
+
+    def __recursive_csp_backtracking(self, x = 0, y= 0):
+        x, y = self._get_tile()
+        if y == -1:
+            return True
+
+        legal_values = self.game.get_legal_values(self.grid, x, y)
+
+        for value in legal_values:
+            self.insert(x, y, value)
+            if self.__recursive_csp_backtracking(x, y):
+                return True
+            self.delete(x, y)
+        return False
+
+    def _get_tile(self):
+        print("getting tile")
+        min_values_count_tiles = []
+        min_values_count = np.inf
+
+        '''
+        Minimum Remaining Values - tiles with least legal values.
+        '''
+        for y in range(0,9):
+            for x in range(0,9):
+                if self.get_value(x,y) != EMPTY_VALUE:
+                    values_count = len(self.game.get_legal_values(self.grid, x, y))
+                    if 0 <values_count < min_values_count:
+                        min_values_count_tiles = [(x,y)] # reset the array and add (x,y)
+                        min_values_count = values_count
+                    elif values_count == min_values_count:
+                        min_values_count_tiles += [(x, y)] # just add (x,y)
+
+        if len(min_values_count_tiles) == 0:
+            return -1, -1
+
+        '''
+        for the tiles from the previous heuristic:
+        Degree Heuristic - tiles with least empty neighbors (row, col, block)
+        '''
+        min_empty_neighbors_count_tiles = []
+        min_empty_neighbors_count = np.inf
+        for (x, y) in min_values_count_tiles:
+            row, col, block = self.game.get_row(self.grid, x), \
+                              self.game.get_column(self.grid, y), \
+                              self.game.get_block(self.grid, x, y)
+
+            empty_neighbors_count = np.count_nonzero(row) + np.count_nonzero(col) + np.count_nonzero(block)
+            if 0 < empty_neighbors_count < min_empty_neighbors_count:
+                min_empty_neighbors_count_tiles = [(x,y)]
+                min_empty_neighbors_count = empty_neighbors_count
+            elif empty_neighbors_count == min_empty_neighbors_count:
+                min_empty_neighbors_count_tiles += [(x, y)]
+
+
+        return min_empty_neighbors_count_tiles[0] # todo somthing smarter
+
+
 
 
