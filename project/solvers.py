@@ -105,17 +105,28 @@ class CSPSolver(Solver):
 
     def __recursive_csp_backtracking(self, x = 0, y= 0):
         x, y = self._get_tile()
-        if y == -1:
+        if y == -1 and self.game.is_complete(self.grid):
+            return True
+        elif y == -1:
+            return False
+
+        chosen_value = self.__get_least_constraining_value(x,y)
+        if chosen_value == -1:
+            return False
+
+        self.insert(x, y, chosen_value)
+        if self.__recursive_csp_backtracking(x, y):
             return True
 
-        legal_values = self.game.get_legal_values(self.grid, x, y)
-
-        for value in legal_values:
-            self.insert(x, y, value)
-            if self.__recursive_csp_backtracking(x, y):
-                return True
-            self.delete(x, y)
-        return False
+        # legal_values = self.game.get_legal_values(self.grid, x, y)
+        # #print(legal_values)
+        #
+        # for value in legal_values:
+        #     self.insert(x, y, value)
+        #     if self.__recursive_csp_backtracking(x, y):
+        #         return True
+        #     self.delete(x, y)
+        # return False
 
     def _get_tile(self):
         min_values_count_tiles = []
@@ -163,6 +174,46 @@ class CSPSolver(Solver):
                 min_empty_neighbors_count_tiles += [(x, y)]
 
         return min_empty_neighbors_count_tiles[0] # todo somthing smarter
+
+    def __get_least_constraining_value(self, x, y):
+        legal_values = self.game.get_legal_values(self.grid, x, y)
+
+        chosen_value = 0
+        max_count = -np.inf
+        for value in legal_values:
+            values_count = 0
+            self.insert(x, y, value)
+
+            for x_n,y_n in self.game.get_neighbors(x,y):
+                if self.get_value(x_n,y_n) == EMPTY_VALUE:
+
+                    neigbor_legal_values_count = len(self.game.get_legal_values(x_n,y_n))
+
+                    if neigbor_legal_values_count == 0:
+                        values_count = np.inf # no way to chose it
+                        break
+                    values_count += len(self.game.get_legal_values(x_n,y_n))
+
+            if values_count > max_count:
+                max_count = values_count
+                chosen_value = value
+            self.delete(x,y)
+
+        if chosen_value == 0:
+            return -1
+
+        return chosen_value
+
+
+
+
+
+
+        # todo if one of neigbors gets 0 return -1
+
+
+
+
 
 
 

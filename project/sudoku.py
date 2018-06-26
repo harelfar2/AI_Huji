@@ -2,9 +2,8 @@ from board import Board
 from functools import reduce
 import numpy as np
 
-from util import EMPTY_VALUE, Action, grid_to_string
+from util import EMPTY_VALUE, Action, grid_to_string, indexes_matrix
 import time
-from datetime import datetime
 from solvers import StupidSolver, BackTrackingSolver, CSPSolver
 
 
@@ -12,6 +11,7 @@ class Sudoku:
 
     def __init__(self, filename, solver_type = 'stupid', display_enabled = True, print = False):
         self.__grid, self.__read_only_tiles = self.__parse_file(filename)
+        self.__solver_type = solver_type
         if solver_type == 'stupid':
             self.__solver = StupidSolver(self)
         if solver_type == 'backtracking':
@@ -32,7 +32,7 @@ class Sudoku:
         end = time.time()
 
         total = end - start
-        print("got solution after", total, "seconds", flush=True)
+        print(self.__solver_type,"got solution after", total, "seconds", flush=True)
 
         if self.__display_enabled:
 
@@ -145,6 +145,29 @@ class Sudoku:
 
         curr_values = reduce(np.union1d, (row_values, col_values, block_values))
         return np.setdiff1d(all_values, curr_values)
+
+    @staticmethod
+    def get_neighbors(x, y):
+        row = [(j, y) for j in range(0,9)]
+        col = [(x, i) for i in range(0,9)]
+
+        if 0 <= x < 3:
+            s_x = slice(0, 3)
+        elif 3 <= x < 6:
+            s_x = slice(3, 6)
+        else:
+            s_x = slice(6, 9)
+
+        if 0 <= y < 3:
+            s_y = slice(0, 3)
+        elif 3 <= y < 6:
+            s_y = slice(3, 6)
+        else:
+            s_y = slice(6, 9)
+
+        block = indexes_matrix[s_y, s_x].reshape(9)
+
+        return row + col + block
 
     @staticmethod
     def is_complete(grid):

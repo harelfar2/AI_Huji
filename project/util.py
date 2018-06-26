@@ -1,5 +1,11 @@
+import numpy as np
+
 EMPTY_VALUE = 0
 delay = 0.05
+
+print("util is running")
+
+
 
 def grid_to_string(grid):
     string = ""
