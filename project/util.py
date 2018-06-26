@@ -5,11 +5,11 @@ def grid_to_string(grid):
     string = ""
     for i in range(9):
         if i in [3, 6]:
-            string += '---+---+---\n'
+            string += '- - - + - - - + - - -\n'
         for j in range(9):
             if j in [3, 6]:
-                string += '|'
-            string += str(grid[i][j])
+                string += '| '
+            string += str(grid[i][j]) + " "
         string += "\n"
 
     return string

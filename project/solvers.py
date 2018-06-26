@@ -118,7 +118,6 @@ class CSPSolver(Solver):
         return False
 
     def _get_tile(self):
-        print("getting tile")
         min_values_count_tiles = []
         min_values_count = np.inf
 
@@ -127,16 +126,23 @@ class CSPSolver(Solver):
         '''
         for y in range(0,9):
             for x in range(0,9):
-                if self.get_value(x,y) != EMPTY_VALUE:
+                if (x,y) not in self.read_only_tiles and\
+                        self.get_value(x,y) == EMPTY_VALUE:
                     values_count = len(self.game.get_legal_values(self.grid, x, y))
-                    if 0 <values_count < min_values_count:
+                    if values_count == 1: # just one possible value. go for it
+                        return x,y
+                    if 0 < values_count < min_values_count:
                         min_values_count_tiles = [(x,y)] # reset the array and add (x,y)
                         min_values_count = values_count
                     elif values_count == min_values_count:
                         min_values_count_tiles += [(x, y)] # just add (x,y)
 
+
         if len(min_values_count_tiles) == 0:
             return -1, -1
+
+        if len(min_values_count_tiles) == 1:
+            return min_values_count_tiles[0]
 
         '''
         for the tiles from the previous heuristic:
@@ -155,7 +161,6 @@ class CSPSolver(Solver):
                 min_empty_neighbors_count = empty_neighbors_count
             elif empty_neighbors_count == min_empty_neighbors_count:
                 min_empty_neighbors_count_tiles += [(x, y)]
-
 
         return min_empty_neighbors_count_tiles[0] # todo somthing smarter
 
