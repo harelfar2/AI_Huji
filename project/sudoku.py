@@ -58,7 +58,8 @@ class Sudoku:
         else:
             print("quit after", action_counter, "action" + ["s", ""][action_counter == 1])
 
-        time.sleep(5)
+        while True:
+            continue
 
     def __insert(self, x, y, value):
         """
@@ -116,10 +117,12 @@ class Sudoku:
 
     @staticmethod
     def get_first_empty_cell(grid, read_only, x_start = 0, y_start = 0):
-        for y in range(y_start, 9):
-            for x in range(x_start, 9):
-                if grid[y][x] == EMPTY_VALUE and (x, y) not in read_only:
-                    return x, y
+
+        ### Improvement
+        # for y in range(y_start, 9):
+        #     for x in range(x_start, 9):
+        #         if grid[y][x] == EMPTY_VALUE and (x, y) not in read_only:
+        #             return x, y
 
         for y in range(0, 9):
             for x in range(0, 9):

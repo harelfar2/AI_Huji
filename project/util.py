@@ -1,5 +1,5 @@
 EMPTY_VALUE = 0
-delay = 0.005
+delay = 0.05
 
 def grid_to_string(grid):
     string = ""

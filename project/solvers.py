@@ -88,6 +88,7 @@ class BackTrackingSolver(Solver):
         # # IMPROVED BACK TRACKING
         # if legal_values is not None:
         #     shuffle(legal_values)
+
         for value in legal_values:
             self.insert(x, y, value)
             if self.__recursive_backtracking(x, y):
