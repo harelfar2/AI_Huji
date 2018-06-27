@@ -4,11 +4,12 @@ hard-backtracking sudoku took:
 ########################   CSP   ########################:
 MRV:
 hard-backtracking sudoku took:
-    DNF
+    Did not finish
 MRV and DH:
 hard-backtracking sudoku took:
     92 sec, 121824 actions
 MRV and DH and LCV
+    14 sec, 25954 actions
 
 
 

@@ -110,23 +110,16 @@ class CSPSolver(Solver):
         elif y == -1:
             return False
 
-        chosen_value = self.__get_least_constraining_value(x,y)
-        if chosen_value == -1:
-            return False
+        chosen_values = self.__get_least_constraining_values(x, y)
+        #print("(",x,y,")",chosen_values)
 
-        self.insert(x, y, chosen_value)
-        if self.__recursive_csp_backtracking(x, y):
-            return True
 
-        # legal_values = self.game.get_legal_values(self.grid, x, y)
-        # #print(legal_values)
-        #
-        # for value in legal_values:
-        #     self.insert(x, y, value)
-        #     if self.__recursive_csp_backtracking(x, y):
-        #         return True
-        #     self.delete(x, y)
-        # return False
+        for value in chosen_values:
+            self.insert(x, y, value)
+            if self.__recursive_csp_backtracking(x, y):
+                return True
+            self.delete(x, y)
+        return False
 
     def _get_tile(self):
         min_values_count_tiles = []
@@ -175,37 +168,44 @@ class CSPSolver(Solver):
 
         return min_empty_neighbors_count_tiles[0] # todo somthing smarter
 
-    def __get_least_constraining_value(self, x, y):
-        legal_values = self.game.get_legal_values(self.grid, x, y)
+    def __get_least_constraining_values(self, x, y):
+        legal_values = np.ndarray.tolist(self.game.get_legal_values(self.grid, x, y))
 
-        chosen_value = 0
-        max_count = -np.inf
-        for value in legal_values:
-            values_count = 0
-            self.insert(x, y, value)
-            for x_n,y_n in self.game.get_neighbors(x,y):
-                if self.get_value(x_n,y_n) == EMPTY_VALUE:
+        legal_values.sort(key=lambda value: -self._neighbor_legal_values_count(x,y, value))
 
-                    neighbor_legal_values_count = len(self.game.get_legal_values(self.grid,x_n,y_n))
-
-                    if neighbor_legal_values_count == 0:
-                        values_count = np.inf # no way to chose it
-                        break
-                    values_count += len(self.game.get_legal_values(self.grid, x_n,y_n))
-
-            if values_count > max_count:
-                max_count = values_count
-                chosen_value = value
-            self.delete(x,y)
-
-        if chosen_value == 0:
-            return -1
-
-        return chosen_value
+        return legal_values
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def _neighbor_legal_values_count(self, x, y, value):
+        values_count = 0
+        self.insert(x, y, value)
+        for x_neighbor, y_neighbor in self.game.get_neighbors(x, y):
+            if self.get_value(x_neighbor, y_neighbor) == EMPTY_VALUE:
+                neighbor_legal_values_count = len(self.game.get_legal_values(self.grid, x_neighbor, y_neighbor))
+                if neighbor_legal_values_count == 0:
+                    values_count = -np.inf  # no way to chose it
+                    break
+                values_count += neighbor_legal_values_count
+
+        self.delete(x, y)
+
+        return values_count
 
 
         # todo if one of neigbors gets 0 return -1
