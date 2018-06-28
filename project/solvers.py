@@ -18,9 +18,15 @@ class Solver(object):
 
     @abc.abstractmethod
     def solve(self):
+        """abstract method, each solver will solve in its way."""
         return
 
+
     def insert(self, x, y, value):
+        """
+        update insetrion to the grid with the value in coordibate (x,y)
+        insert coordinate and value to the queue in order to recreate the actions that led to the solution.
+        """
         if (x, y) in self.read_only_tiles:
             print("READ ONLY TILE ON (", x, y, ") CAN'T INSERT VALUE", value)
             sys.exit()
@@ -28,7 +34,12 @@ class Solver(object):
         self.full_tiles += [(x, y)]
         self.actions_queue.append((Action(x, y, value)))
 
+
     def delete(self, x, y):
+        """
+        update deletion from the grid in the coordibate (x,y)
+        delete content from coordinate from the queue in order to recreate the actions that led to the solution.
+        """
         if (x, y) in self.read_only_tiles:
             print("READ ONLY TILE ON (", x, y, ") CAN'T DELETE")
             sys.exit()
@@ -36,10 +47,14 @@ class Solver(object):
         self.full_tiles.remove((x, y))
         self.actions_queue.append(Action(x, y))
 
+
     def quit(self):
+        """ quit action"""
         self.actions_queue.append(Action(quit=True))
 
+
     def get_value(self, x, y):
+        """ get value from coordinate"""
         return self.grid[y][x]
 
 
@@ -72,6 +87,10 @@ class StupidSolver(Solver):
 
 
 class BackTrackingSolver(Solver):
+    """
+    This solver will look for free spots and put possible values in there.
+    If got stuck, will backtrace and try different value from where got stuck.
+    """
 
     def solve(self):
         if self.__recursive_backtracking():
@@ -79,15 +98,19 @@ class BackTrackingSolver(Solver):
         return self.actions_queue
 
     def __recursive_backtracking(self, x=0, y=0):
+        """Recursively try to put values in the first free spot, will stop if no empty cells exist."""
         x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, x, y)
         if y == -1:
             return True
 
-        legal_values = self.game.get_legal_values(self.grid, x, y)
+        legal_values = self.game.get_legal_values(self.grid, x, y, shuffle = False)
 
-        # # IMPROVED BACK TRACKING
-        # if legal_values is not None:
-        #     shuffle(legal_values)
+
+        # # IMPROVED BACK TRACKING.
+        # some boards are designed to make it hard for solver the tries values from 1 to 9
+        # shuffle the possible options will solve this problem.
+        if shuffle and legal_values is not None:
+            shuffle(legal_values)
 
         for value in legal_values:
             self.insert(x, y, value)
@@ -104,16 +127,15 @@ class CSPSolver(Solver):
         return self.actions_queue
 
     def __recursive_csp_backtracking(self, x = 0, y= 0):
+        """Solves the sudoku with 3 CSP heuristics:
+        Minimum Remaining Values, degree heuristics, least constraining value
+        """
         x, y = self._get_tile()
         if y == -1 and self.game.is_complete(self.grid):
             return True
         elif y == -1:
             return False
-
         chosen_values = self.__get_least_constraining_values(x, y)
-        #print("(",x,y,")",chosen_values)
-
-
         for value in chosen_values:
             self.insert(x, y, value)
             if self.__recursive_csp_backtracking(x, y):
@@ -122,6 +144,7 @@ class CSPSolver(Solver):
         return False
 
     def _get_tile(self):
+        """Returns the tile that satisfies Minimum Remaining Values, degree heuristics"""
         min_values_count_tiles = []
         min_values_count = np.inf
 
@@ -166,9 +189,12 @@ class CSPSolver(Solver):
             elif empty_neighbors_count == min_empty_neighbors_count:
                 min_empty_neighbors_count_tiles += [(x, y)]
 
-        return min_empty_neighbors_count_tiles[0] # todo somthing smarter
+        return min_empty_neighbors_count_tiles[0]
 
     def __get_least_constraining_values(self, x, y):
+        """Return the value that will constrain other tiles the least.
+        Go through every neighbor the the chosen tile, and check how many possibilities all the neighbor have,
+         and choose the value that gives the neighbors the most possibilities."""
         legal_values = np.ndarray.tolist(self.game.get_legal_values(self.grid, x, y))
 
         legal_values.sort(key=lambda value: -self._neighbor_legal_values_count(x,y, value))
@@ -177,22 +203,8 @@ class CSPSolver(Solver):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def _neighbor_legal_values_count(self, x, y, value):
+        """Get the number of possible values for all the neighbor for the given value"""
         values_count = 0
         self.insert(x, y, value)
         for x_neighbor, y_neighbor in self.game.get_neighbors(x, y):
