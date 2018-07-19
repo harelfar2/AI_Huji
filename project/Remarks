@@ -1,7 +1,7 @@
 ########################   Simple backtracking ########################:
 hard-backtracking sudoku took:
     60 sec, 600984 actions
-########################   CSP   ########################:
+################################   CSP   ##############################:
 MRV:
 hard-backtracking sudoku took:
     Did not finish
