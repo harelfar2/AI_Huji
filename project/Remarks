@@ -12,11 +12,8 @@ MRV and DH and LCV
     14 sec, 25954 actions
 
 
-
-
-
-
-
 MRV - minimum remaining values
 DH - degree heuristic (tiles with least empty neighbors)
 LCV - least constraining value
+
+########################   Forward Checking   ##########################:

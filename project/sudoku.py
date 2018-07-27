@@ -4,7 +4,7 @@ import numpy as np
 
 from util import EMPTY_VALUE, Action, grid_to_string
 import time
-from solvers import StupidSolver, BackTrackingSolver, CSPSolver
+from solvers import StupidSolver, BackTrackingSolver, CSPSolver, SimulatedAnnealingSolver
 
 
 class Sudoku:
@@ -18,6 +18,8 @@ class Sudoku:
             self.__solver = BackTrackingSolver(self)
         if solver_type == 'csp':
             self.__solver = CSPSolver(self)
+        if solver_type == 'sa':
+            self.__solver = SimulatedAnnealingSolver(self)
 
 
 
@@ -53,7 +55,8 @@ class Sudoku:
                     print("\n", self)
                 action_counter += 1
         else:
-            action_counter = len(actions_queue)
+            #action_counter = len(actions_queue) # todo
+            action_counter = 0 # todo
             quit_game = not self.__solver.is_solved
             print(grid_to_string(self.__solver.grid))
 
@@ -61,6 +64,8 @@ class Sudoku:
             print("solved with", action_counter, "action" + ["s", ""][action_counter == 1])
         else:
             print("quit after", action_counter, "action" + ["s", ""][action_counter == 1])
+
+        return total
 
     def __insert(self, x, y, value):
         """
@@ -148,6 +153,11 @@ class Sudoku:
 
     @staticmethod
     def get_neighbors(x, y):
+        '''
+        :param x:
+        :param y:
+        :return: list of indexes of neighbors of (x,y)
+        '''
         row = [(j, y) for j in range(0, 9)]
         col = [(x, i) for i in range(0, 9)]
 
@@ -201,6 +211,10 @@ class Sudoku:
         return self.__read_only_tiles
 
     @staticmethod
+    def get_block_start_indexes(x, y):
+        return x // 3 * 3, y // 3 * 3
+
+    @staticmethod
     def __parse_file(filename):
         with open(filename) as f:
             line = f.readlines()[0]
@@ -216,6 +230,9 @@ class Sudoku:
             values += [int(char)]
 
         return np.array(values).reshape(9,9), read_only
+
+    def set_grid(self, grid):
+        self.__grid = grid
 
     def __str__(self):
         return grid_to_string(self.__grid)

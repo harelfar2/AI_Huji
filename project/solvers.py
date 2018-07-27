@@ -1,9 +1,11 @@
 import abc
-from random import randint, shuffle
-from util import Action, EMPTY_VALUE
+from random import randint, shuffle, random, sample
+from util import Action, EMPTY_VALUE, solved_example
 from collections import deque
+from math import exp, ceil
 import sys
 import numpy as np
+from copy import deepcopy
 
 
 class Solver(object):
@@ -12,9 +14,9 @@ class Solver(object):
         self.actions_queue = deque()
         self.is_solved = False
         self.game = game
-        self.grid = game.get_grid().copy()
-        self.read_only_tiles = game.get_read_only().copy()
-        self.full_tiles = self.read_only_tiles.copy()
+        self.grid = deepcopy(game.get_grid())
+        self.read_only_tiles = deepcopy(game.get_read_only())
+        self.full_tiles = deepcopy(self.read_only_tiles.copy())
 
     @abc.abstractmethod
     def solve(self):
@@ -28,7 +30,7 @@ class Solver(object):
         insert coordinate and value to the queue in order to recreate the actions that led to the solution.
         """
         if (x, y) in self.read_only_tiles:
-            print("READ ONLY TILE ON (", x, y, ") CAN'T INSERT VALUE", value)
+            print("READ ONLY TILE ON ( ", x, y, ") CAN'T INSERT VALUE", value)
             sys.exit()
         self.grid[y][x] = value
         self.full_tiles += [(x, y)]
@@ -41,7 +43,7 @@ class Solver(object):
         delete content from coordinate from the queue in order to recreate the actions that led to the solution.
         """
         if (x, y) in self.read_only_tiles:
-            print("READ ONLY TILE ON (", x, y, ") CAN'T DELETE")
+            print("READ ONLY TILE ON ( ", x, y, ") CAN'T DELETE")
             sys.exit()
         self.grid[y][x] = EMPTY_VALUE
         self.full_tiles.remove((x, y))
@@ -103,7 +105,7 @@ class BackTrackingSolver(Solver):
         if y == -1:
             return True
 
-        legal_values = self.game.get_legal_values(self.grid, x, y, shuffle = False)
+        legal_values = self.game.get_legal_values(self.grid, x, y)
 
 
         # # IMPROVED BACK TRACKING.
@@ -223,9 +225,276 @@ class CSPSolver(Solver):
         # todo if one of neigbors gets 0 return -1
 
 
+class SimulatedAnnealingSolver(Solver):
+    def solve(self):
+
+        self.random_fill()
+
+        curr_score = self.score(self.grid)
+
+        temperature = 1
+        iteration_count, escape_count, stuck_count = 0, 0, 0
+        best_score = curr_score
+        switches = 0
+
+        while True:
+            iteration_count += 1
+            if iteration_count % 1000 == 0:
+                print("iteration:", iteration_count, "escapes:", escape_count, "switches:", switches,
+                      "score:", curr_score, "temp:", temperature)
+                escape_count = 0
+                switches = 0
+
+            succ = self.switch_tiles()
+            succ_score = self.score(succ)
+
+            if succ_score == 243:
+                print(self.score(succ))
+                self.grid = succ
+                self.game.set_grid(succ)
+                return
+
+            delta = float(succ_score - curr_score)
+
+
+            if delta > 0:
+                old_grid = deepcopy(self.grid)
+                self.grid = deepcopy(succ)
+                switches += 1
+                curr_score = succ_score
+
+                if exp(min(delta / temperature, 709)) - random() > 0:
+                    self.grid = deepcopy(old_grid)
+
+            else:
+                if exp(delta / temperature) - random() > 0:
+                    escape_count += 1
+                    self.grid = deepcopy(succ)
+                    switches += 1
+                    curr_score = succ_score
+
+            if best_score < curr_score:
+                stuck_count = 0
+                best_score = curr_score
+            else:
+                stuck_count += 1
+                if stuck_count % (3000 + 5000//(243 - best_score)) == 0: # we've been same or worse then the best score for a long time
+                    print("\nRANDOMIZE!, couldn't pass", best_score, "for", stuck_count, "iterations\n", )
+
+                    self.randomize()
+                    # todo
+                    # self.delete_progress()
+                    # self.random_fill()
+
+                    stuck_count = 0
+                    curr_score = self.score(self.grid)
+                    print("score after random:", curr_score)
+                    best_score = curr_score
+                    temperature = 1
+
+            temperature *= .999
+
+    def random_fill(self):
+        for x in range(9):
+            possible_values = np.setdiff1d(np.array([value for value in range(1, 10)]),
+                                           self.game.get_column(self.grid, x))
+            for y in range(9):
+                if self.get_value(x,y) == 0: # or else it is read only and we don't mess with it
+                    rand_index = randint(0, len(possible_values) - 1)
+                    self.insert(x, y, possible_values[rand_index])
+                    possible_values = np.delete(possible_values, rand_index)
+
+    def score(self, grid):
+        score = 0
+        for i in range(9):
+            score += len(set(self.game.get_row(grid, i)))
+            score += len(set(self.game.get_column(grid, i)))
+
+        for y in [0, 3, 6]:
+            for x in [0, 3, 6]:
+                score += len(set(self.game.get_block(grid, x, y)))
+
+        return score
+
+    def get_random_neighbors(self):
+        x = randint(0,8)
+        y1 = randint(0, 8)
+        y2 = randint(0, 8)
+        while y1 != y2 and (x, y1) not in self.read_only_tiles and (x, y2) not in self.read_only_tiles:
+            x = randint(0, 8)
+            y1 = randint(0, 8)
+            y2 = randint(0, 8)
+
+        return (x, y1), (x, y2)
+
+    def switch_tiles(self):
+        next_grid = deepcopy(self.grid.copy())
+
+        (x1, y1), (x2, y2) = self.get_random_neighbors()
+        value1 = self.get_value(x1, y1)
+        value2 = self.get_value(x2, y2)
+
+        next_grid[y1][x1] = value2
+        next_grid[y2][x2] = value1
+
+        return next_grid
+
+    def randomize(self):
+        columns_to_shuffle = sample(range(0, 9), randint(1, 5))
+
+        for x in columns_to_shuffle:
+            for y in range(0, 9):
+                if (x, y) not in self.read_only_tiles:
+                    self.delete(x, y)
+
+        for x in columns_to_shuffle:
+            possible_values = np.setdiff1d(np.array([value for value in range(1, 10)]),
+                                           self.game.get_column(self.grid, x))
+            for y in range(0, 9):
+                if self.get_value(x,y) == 0: # or else it is read only and we don't mess with it
+                    rand_index = randint(0, len(possible_values) - 1)
+                    self.insert(x, y, possible_values[rand_index])
+                    possible_values = np.delete(possible_values, rand_index)
 
 
 
 
+
+
+
+    def delete_progress(self):
+        for y in range(9):
+            for x in range(9):
+                if (x, y) not in self.read_only_tiles:
+                    self.delete(x,y)
+
+'''
+class SimulatedAnnealingSolver_secondAttempt(Solver):
+
+    def solve(self):
+        self.random_fill()
+
+        curr_score = self.score(self.grid)
+
+        temperature = 1
+        iteration_count, escape_count, stuck_count = 0, 0, 0
+        best_score = curr_score
+        switches = 0
+
+        while True:
+            iteration_count += 1
+            if iteration_count % 1000 == 0:
+                print("iteration:", iteration_count, "escapes:", escape_count, "switches:", switches,
+                      "score:", curr_score, "temp:", temperature)
+                escape_count = 0
+                switches = 0
+
+            succ = self.switch_tiles()
+            succ_score = self.score(succ)
+
+            if succ_score == 243:
+                print(self.score(succ))
+                self.grid = succ
+                self.game.set_grid(succ)
+                return
+
+            delta = float(succ_score - curr_score)
+
+            if delta > 0:
+                old_grid = deepcopy(self.grid)
+                self.grid = deepcopy(succ)
+                switches += 1
+                curr_score = succ_score
+
+                if exp(min(delta / temperature, 709)) - random() > 0:
+                    self.grid = deepcopy(old_grid)
+
+            else:
+                if exp(delta / temperature) - random() > 0:
+                    escape_count += 1
+                    self.grid = deepcopy(succ)
+                    switches += 1
+                    curr_score = succ_score
+
+            if best_score < curr_score:
+                stuck_count = 0
+                best_score = curr_score
+            else:
+                stuck_count += 1
+                if stuck_count % (3000 + ceil(10000 / (
+                        243 - best_score))) == 0:  # we've been same or worse then the best score for a long time
+                    print("\nRANDOMIZE!, couldn't pass", best_score, "for", stuck_count, "iterations\n")
+                    self.delete_progress()
+                    self.random_fill()
+
+                    stuck_count = 0
+                    curr_score = self.score(self.grid)
+                    best_score = curr_score
+                    temperature = 1
+
+            temperature *= .999
+
+    def switch_tiles(self):
+        next_grid = deepcopy(self.grid.copy())
+
+        (x1, y1), (x2, y2) = self.get_random_block_neighbors()
+        value1 = self.get_value(x1, y1)
+        value2 = self.get_value(x2, y2)
+
+        next_grid[y1][x1] = value2
+        next_grid[y2][x2] = value1
+
+        return next_grid
+
+    def get_random_block_neighbors(self):
+        x1, y1 = randint(0, 8), randint(0, 8)
+
+        while (x1, y1) in self.read_only_tiles:
+            x1, y1 = randint(0, 8), randint(0, 8)
+
+        x_block, y_block = self.game.get_block_start_indexes(x1, y1)
+
+        x_offsets, y_offsets = [0,1, 2], [0,1, 2]
+        x_offsets.remove((x1 - x_block) % 3)
+        y_offsets.remove((y1 - y_block) % 3)
+
+        x2, y2 = x_block + x_offsets[randint(0, 1)], y_block + y_offsets[randint(0, 1)]
+        while (x2, y2) in self.read_only_tiles:
+            x2, y2 = x_block + x_offsets[randint(0, 1)], y_block + y_offsets[randint(0, 1)]
+
+        return (x1, y1), (x2, y2)
+
+    def score(self, grid):
+        score = 0
+
+        for i in range(9):
+            score += len(set(self.game.get_row(grid, i)))
+            score += len(set(self.game.get_column(grid, i)))
+
+        for y in [0, 3, 6]:
+            for x in [0, 3, 6]:
+                score += len(set(self.game.get_block(grid, x, y)))
+
+        return score
+
+    def random_fill(self):
+
+        for y in [0, 3, 6]:
+            for x in [0, 3, 6]:
+                possible_values = np.setdiff1d(np.array([value for value in range(1, 10)]),
+                                               self.game.get_block(self.grid, x, y))
+                for y_offset in range(3):
+                    for x_offset in range(3):
+                        if self.get_value(x + x_offset, y + y_offset) == 0: # or else it is read only and we don't mess with it
+                            rand_index = randint(0, len(possible_values) - 1)
+                            self.insert(x + x_offset, y + y_offset, possible_values[rand_index])
+                            possible_values = np.delete(possible_values, rand_index)
+
+    def delete_progress(self):
+        for y in range(9):
+            for x in range(9):
+                if (x, y) not in self.read_only_tiles:
+                    self.delete(x,y)
+'''
 
 
