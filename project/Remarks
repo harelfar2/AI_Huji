@@ -1,19 +1,26 @@
 ########################   Simple backtracking ########################:
+
+easy sudoku took:
+    0.13 sec, 1134 actions
 hard-backtracking sudoku took:
     60 sec, 600984 actions
-################################   CSP   ##############################:
-MRV:
-hard-backtracking sudoku took:
-    Did not finish
-MRV and DH:
-hard-backtracking sudoku took:
-    92 sec, 121824 actions
-MRV and DH and LCV
-    14 sec, 25954 actions
 
+################################   CSP   ##############################:
+
+easy sudoku took:
+    0.14 seconds, 144 actions
+hard-backtracking sudoku took:
+    15 seconds 25954
 
 MRV - minimum remaining values
 DH - degree heuristic (tiles with least empty neighbors)
 LCV - least constraining value
+
+################################   ARC   ##############################:
+
+easy sudoku took:
+    0.13 seconds, 982 actions
+hard-backtracking sudoku took:
+    60 sec, 600984 actions
 
 ########################   Forward Checking   ##########################:

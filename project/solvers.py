@@ -361,135 +361,6 @@ class SimulatedAnnealingSolver(Solver):
                 if (x, y) not in self.read_only_tiles:
                     self.delete(x,y)
 
-'''
-class SimulatedAnnealingSolver_secondAttempt(Solver):
-
-    def solve(self):
-        self.random_fill()
-
-        curr_score = self.score(self.grid)
-
-        temperature = 1
-        iteration_count, escape_count, stuck_count = 0, 0, 0
-        best_score = curr_score
-        switches = 0
-
-        while True:
-            iteration_count += 1
-            if iteration_count % 1000 == 0:
-                print("iteration:", iteration_count, "escapes:", escape_count, "switches:", switches,
-                      "score:", curr_score, "temp:", temperature)
-                escape_count = 0
-                switches = 0
-
-            succ = self.switch_tiles()
-            succ_score = self.score(succ)
-
-            if succ_score == 243:
-                print(self.score(succ))
-                self.grid = succ
-                self.game.set_grid(succ)
-                return
-
-            delta = float(succ_score - curr_score)
-
-            if delta > 0:
-                old_grid = deepcopy(self.grid)
-                self.grid = deepcopy(succ)
-                switches += 1
-                curr_score = succ_score
-
-                if exp(min(delta / temperature, 709)) - random() > 0:
-                    self.grid = deepcopy(old_grid)
-
-            else:
-                if exp(delta / temperature) - random() > 0:
-                    escape_count += 1
-                    self.grid = deepcopy(succ)
-                    switches += 1
-                    curr_score = succ_score
-
-            if best_score < curr_score:
-                stuck_count = 0
-                best_score = curr_score
-            else:
-                stuck_count += 1
-                if stuck_count % (3000 + ceil(10000 / (
-                        243 - best_score))) == 0:  # we've been same or worse then the best score for a long time
-                    print("\nRANDOMIZE!, couldn't pass", best_score, "for", stuck_count, "iterations\n")
-                    self.delete_progress()
-                    self.random_fill()
-
-                    stuck_count = 0
-                    curr_score = self.score(self.grid)
-                    best_score = curr_score
-                    temperature = 1
-
-            temperature *= .999
-
-    def switch_tiles(self):
-        next_grid = deepcopy(self.grid.copy())
-
-        (x1, y1), (x2, y2) = self.get_random_block_neighbors()
-        value1 = self.get_value(x1, y1)
-        value2 = self.get_value(x2, y2)
-
-        next_grid[y1][x1] = value2
-        next_grid[y2][x2] = value1
-
-        return next_grid
-
-    def get_random_block_neighbors(self):
-        x1, y1 = randint(0, 8), randint(0, 8)
-
-        while (x1, y1) in self.read_only_tiles:
-            x1, y1 = randint(0, 8), randint(0, 8)
-
-        x_block, y_block = self.game.get_block_start_indexes(x1, y1)
-
-        x_offsets, y_offsets = [0,1, 2], [0,1, 2]
-        x_offsets.remove((x1 - x_block) % 3)
-        y_offsets.remove((y1 - y_block) % 3)
-
-        x2, y2 = x_block + x_offsets[randint(0, 1)], y_block + y_offsets[randint(0, 1)]
-        while (x2, y2) in self.read_only_tiles:
-            x2, y2 = x_block + x_offsets[randint(0, 1)], y_block + y_offsets[randint(0, 1)]
-
-        return (x1, y1), (x2, y2)
-
-    def score(self, grid):
-        score = 0
-
-        for i in range(9):
-            score += len(set(self.game.get_row(grid, i)))
-            score += len(set(self.game.get_column(grid, i)))
-
-        for y in [0, 3, 6]:
-            for x in [0, 3, 6]:
-                score += len(set(self.game.get_block(grid, x, y)))
-
-        return score
-
-    def random_fill(self):
-
-        for y in [0, 3, 6]:
-            for x in [0, 3, 6]:
-                possible_values = np.setdiff1d(np.array([value for value in range(1, 10)]),
-                                               self.game.get_block(self.grid, x, y))
-                for y_offset in range(3):
-                    for x_offset in range(3):
-                        if self.get_value(x + x_offset, y + y_offset) == 0: # or else it is read only and we don't mess with it
-                            rand_index = randint(0, len(possible_values) - 1)
-                            self.insert(x + x_offset, y + y_offset, possible_values[rand_index])
-                            possible_values = np.delete(possible_values, rand_index)
-
-    def delete_progress(self):
-        for y in range(9):
-            for x in range(9):
-                if (x, y) not in self.read_only_tiles:
-                    self.delete(x,y)
-'''
-
 
 class ArcConsistencySolver(Solver):
     def solve(self):
@@ -554,9 +425,12 @@ class ArcConsistencySolver(Solver):
     def remove_inconsistent_values(self, pair):
         (x1, y1), (x2, y2) = pair[0], pair[1]
 
+        if len(self.domain_matrix[y2][x2]) != 1:
+            return False
+
         removed = False
         for value1 in self.domain_matrix[y1][x1]:
-            if len(self.domain_matrix[y2][x2]) == 1 and self.domain_matrix[y2][x2][0] == value1:
+            if self.domain_matrix[y2][x2][0] == value1:
                 # delete value1 from [x1, y1]
                 self.domain_matrix[y1][x1] = np.delete(self.domain_matrix[y1][x1],
                                                        np.argwhere(self.domain_matrix[y1][x1] == value1))

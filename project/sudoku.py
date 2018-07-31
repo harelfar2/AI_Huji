@@ -9,20 +9,21 @@ from solvers import StupidSolver, BackTrackingSolver, CSPSolver, SimulatedAnneal
 class SolverType:
     STUPID = 'stupid'
     BACKTRACKING = 'backtracking'
-    CPS = 'csp'
+    CSP = 'csp'
     SA = 'sa'
     AC = 'ac'
 
 class Sudoku:
 
-    def __init__(self, filename, solver_type = 'stupid', display_enabled = True, print = False):
+    def __init__(self, filename, solver_type = 'stupid', display_enabled = False, print = False):
+        self.__file_name = filename
         self.__grid, self.__read_only_tiles = self.__parse_file(filename)
         self.__solver_type = solver_type
         if solver_type == SolverType.STUPID:
             self.__solver = StupidSolver(self)
         if solver_type == SolverType.BACKTRACKING:
             self.__solver = BackTrackingSolver(self)
-        if solver_type == SolverType.CPS:
+        if solver_type == SolverType.CSP:
             self.__solver = CSPSolver(self)
         if solver_type == SolverType.SA:
             self.__solver = SimulatedAnnealingSolver(self)
@@ -73,7 +74,7 @@ class Sudoku:
         else:
             print("quit after", action_counter, "action" + ["s", ""][action_counter == 1])
 
-        return total
+        return total, action_counter
 
     def __insert(self, x, y, value):
         """
