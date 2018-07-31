@@ -107,13 +107,6 @@ class BackTrackingSolver(Solver):
 
         legal_values = self.game.get_legal_values(self.grid, x, y)
 
-
-        # # IMPROVED BACK TRACKING.
-        # some boards are designed to make it hard for solver the tries values from 1 to 9
-        # shuffle the possible options will solve this problem.
-        if shuffle and legal_values is not None:
-            shuffle(legal_values)
-
         for value in legal_values:
             self.insert(x, y, value)
             if self.__recursive_backtracking(x, y):
@@ -290,7 +283,7 @@ class SimulatedAnnealingSolver(Solver):
                     curr_score = self.score(self.grid)
                     print("score after random:", curr_score)
                     best_score = curr_score
-                    temperature = 1
+                    #temperature = 1
 
             temperature *= .999
 
@@ -496,5 +489,107 @@ class SimulatedAnnealingSolver_secondAttempt(Solver):
                 if (x, y) not in self.read_only_tiles:
                     self.delete(x,y)
 '''
+
+
+class ArcConsistencySolver(Solver):
+    def solve(self):
+        self.create_domains_matrix()
+        self.create_arcs_queue()
+        self.domains_reduction()
+
+        if self.__recursive_backtracking():
+            self.is_solved = True
+        return self.actions_queue
+
+
+    def __recursive_backtracking(self, x=0, y=0):
+        """Recursively try to put values in the first free spot, will stop if no empty cells exist."""
+        x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, x, y)
+        if y == -1:
+            return True
+
+        legal_values = self.domain_matrix[y][x]
+
+        for value in legal_values:
+            self.insert(x, y, value)
+            if self.__recursive_backtracking(x, y):
+                return True
+            self.delete(x, y)
+        return False
+
+    def create_domains_matrix(self):
+        '''
+        create an 9x9 matrix where each entry (x,y) holds the domain of the (x,y) tile
+        '''
+
+        self.domain_matrix = np.empty((9,9), dtype=object)
+
+        for y in range(9):
+            for x in range(9):
+                if self.get_value(x, y) == EMPTY_VALUE:
+                    self.domain_matrix[y][x] = self.game.get_legal_values(self.grid, x, y)
+                else:
+                    self.domain_matrix[y][x] = np.array([self.get_value(x,y)])
+
+    def create_arcs_queue(self):
+        '''
+        creates a queue of pairs of neighbors ((x1,y1),(x2,y2)) of the matrix
+        :return:
+        '''
+        self.arcs_queue = set()
+        for y in range(9):
+            for x in range(9):
+
+                if self.get_value(x, y) == EMPTY_VALUE:
+                    for neighbor in self.game.get_neighbors_indexes(x, y):
+                        self.arcs_queue.add(((x,y), neighbor))
+
+    def domains_reduction(self):
+        while self.arcs_queue:
+            pair = self.arcs_queue.pop()
+            if self.remove_inconsistent_values(pair):
+                if pair[1] not in self.read_only_tiles:
+                    for neighbor in self.game.get_neighbors_indexes(pair[1][0], pair[1][1]):
+                        self.arcs_queue.add((pair[1], neighbor))
+
+    def remove_inconsistent_values(self, pair):
+        (x1, y1), (x2, y2) = pair[0], pair[1]
+
+        removed = False
+        for value1 in self.domain_matrix[y1][x1]:
+            if len(self.domain_matrix[y2][x2]) == 1 and self.domain_matrix[y2][x2][0] == value1:
+                # delete value1 from [x1, y1]
+                self.domain_matrix[y1][x1] = np.delete(self.domain_matrix[y1][x1],
+                                                       np.argwhere(self.domain_matrix[y1][x1] == value1))
+
+                removed = True
+
+        return removed
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

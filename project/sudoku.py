@@ -4,7 +4,7 @@ import numpy as np
 
 from util import EMPTY_VALUE, Action, grid_to_string
 import time
-from solvers import StupidSolver, BackTrackingSolver, CSPSolver, SimulatedAnnealingSolver
+from solvers import StupidSolver, BackTrackingSolver, CSPSolver, SimulatedAnnealingSolver, ArcConsistencySolver
 
 
 class Sudoku:
@@ -20,6 +20,8 @@ class Sudoku:
             self.__solver = CSPSolver(self)
         if solver_type == 'sa':
             self.__solver = SimulatedAnnealingSolver(self)
+        if solver_type == 'ac':
+            self.__solver = ArcConsistencySolver(self)
 
 
 
@@ -51,13 +53,13 @@ class Sudoku:
                     quit_game = True
                     break
 
-                if not self.__display_enabled and self.__print_enabled:
-                    print("\n", self)
                 action_counter += 1
         else:
-            #action_counter = len(actions_queue) # todo
-            action_counter = 0 # todo
+            action_counter = len(actions_queue) # todo
+            #action_counter = 0 # todo
             quit_game = not self.__solver.is_solved
+
+        if self.__print_enabled:
             print(grid_to_string(self.__solver.grid))
 
         if not quit_game:
@@ -215,6 +217,17 @@ class Sudoku:
         return x // 3 * 3, y // 3 * 3
 
     @staticmethod
+    def get_block_indexes(x,y):
+        indexes = []
+        x_start, y_start = Sudoku.get_block_start_indexes(x, y)
+        for y_offset in range(3):
+            for x_offset in range(3):
+                if x != x_start + x_offset or y != y_start + y_offset:
+                    indexes += [(x_start + x_offset, y_start + y_offset)]
+
+        return np.array(indexes)
+
+    @staticmethod
     def __parse_file(filename):
         with open(filename) as f:
             line = f.readlines()[0]
@@ -230,6 +243,21 @@ class Sudoku:
             values += [int(char)]
 
         return np.array(values).reshape(9,9), read_only
+
+    @staticmethod
+    def get_neighbors_indexes(x, y):
+        neighbors = []
+        for i in range(9):
+            if i != y:
+                neighbors.append((x, i))
+            if i != x:
+                neighbors.append((i, y))
+
+        # block
+        for neighbor in Sudoku.get_block_indexes(x, y):
+            neighbors.append(tuple(neighbor))
+
+        return neighbors
 
     def set_grid(self, grid):
         self.__grid = grid
