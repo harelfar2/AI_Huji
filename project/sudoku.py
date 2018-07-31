@@ -6,21 +6,27 @@ from util import EMPTY_VALUE, Action, grid_to_string
 import time
 from solvers import StupidSolver, BackTrackingSolver, CSPSolver, SimulatedAnnealingSolver, ArcConsistencySolver
 
+class SolverType:
+    STUPID = 'stupid'
+    BACKTRACKING = 'backtracking'
+    CPS = 'csp'
+    SA = 'sa'
+    AC = 'ac'
 
 class Sudoku:
 
     def __init__(self, filename, solver_type = 'stupid', display_enabled = True, print = False):
         self.__grid, self.__read_only_tiles = self.__parse_file(filename)
         self.__solver_type = solver_type
-        if solver_type == 'stupid':
+        if solver_type == SolverType.STUPID:
             self.__solver = StupidSolver(self)
-        if solver_type == 'backtracking':
+        if solver_type == SolverType.BACKTRACKING:
             self.__solver = BackTrackingSolver(self)
-        if solver_type == 'csp':
+        if solver_type == SolverType.CPS:
             self.__solver = CSPSolver(self)
-        if solver_type == 'sa':
+        if solver_type == SolverType.SA:
             self.__solver = SimulatedAnnealingSolver(self)
-        if solver_type == 'ac':
+        if solver_type == SolverType.AC:
             self.__solver = ArcConsistencySolver(self)
 
 
