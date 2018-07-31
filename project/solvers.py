@@ -503,12 +503,11 @@ class ArcConsistencySolver(Solver):
 
 
     def __recursive_backtracking(self, x=0, y=0):
-        """Recursively try to put values in the first free spot, will stop if no empty cells exist."""
         x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, x, y)
         if y == -1:
             return True
 
-        legal_values = self.domain_matrix[y][x]
+        legal_values = np.intersect1d(self.domain_matrix[y][x], self.game.get_legal_values(self.grid, x, y))
 
         for value in legal_values:
             self.insert(x, y, value)
