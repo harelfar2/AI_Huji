@@ -171,14 +171,14 @@ class CSPSolver(Solver):
         Degree Heuristic - tiles with least empty neighbors (row, col, block)
         '''
         min_empty_neighbors_count_tiles = []
-        min_empty_neighbors_count = np.inf
+        min_empty_neighbors_count = 0
         for (x, y) in min_values_count_tiles:
             row, col, block = self.game.get_row(self.grid, x), \
                               self.game.get_column(self.grid, y), \
                               self.game.get_block(self.grid, x, y)
 
             empty_neighbors_count = np.count_nonzero(row) + np.count_nonzero(col) + np.count_nonzero(block)
-            if 0 < empty_neighbors_count < min_empty_neighbors_count:
+            if empty_neighbors_count > min_empty_neighbors_count:
                 min_empty_neighbors_count_tiles = [(x,y)]
                 min_empty_neighbors_count = empty_neighbors_count
             elif empty_neighbors_count == min_empty_neighbors_count:
@@ -438,27 +438,6 @@ class ArcConsistencySolver(Solver):
                 removed = True
 
         return removed
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
