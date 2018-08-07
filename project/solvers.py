@@ -440,8 +440,33 @@ class ArcConsistencySolver(Solver):
         return removed
 
 
+class ForwardCheckingSolver(Solver):
+    def solve(self):
+        if self.__recursive_backtracking():
+            self.is_solved = True
+        return self.actions_queue
 
+    def __recursive_backtracking(self, x=0, y=0):
+        """Recursively try to put values in the first free spot, will stop if no empty cells exist."""
+        x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, x, y)
+        if y == -1:
+            return True
 
+        if self.check_if_dead_end():
+            return False
 
+        legal_values = self.game.get_legal_values(self.grid, x, y)
 
+        for value in legal_values:
+            self.insert(x, y, value)
+            if self.__recursive_backtracking(x, y):
+                return True
+            self.delete(x, y)
+        return False
 
+    def check_if_dead_end(self):
+        for y in range(9):
+            for x in range(9):
+                if self.grid[x][y] == 0 and len(self.game.get_legal_values(self.grid, y, x)) == 0:
+                    return True
+        return False

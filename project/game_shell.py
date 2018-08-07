@@ -20,7 +20,7 @@ if __name__ == '__main__':
         print(os_error)
         print_explanation_and_terminate()
 
-    SOLVER_TYPES = ["stupid", "backtracking", "csp", "sa", "ac"]
+    SOLVER_TYPES = ["stupid", "backtracking", "csp", "sa", "ac", "fc"]
     solver_type = args[2]
     if solver_type not in SOLVER_TYPES:
         print_explanation_and_terminate()

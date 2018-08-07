@@ -4,14 +4,15 @@ import numpy as np
 
 from util import EMPTY_VALUE, Action, grid_to_string
 import time
-from solvers import StupidSolver, BackTrackingSolver, CSPSolver, SimulatedAnnealingSolver, ArcConsistencySolver
+from solvers import *
 
 class SolverType:
     STUPID = 'stupid'
     BACKTRACKING = 'backtracking'
     CSP = 'csp'
-    SA = 'sa'
-    AC = 'ac'
+    SA = 'sa'  # simulated annealing
+    AC = 'ac'  # arc consistency
+    FC = 'fc'  # forward checking
 
 class Sudoku:
 
@@ -29,7 +30,8 @@ class Sudoku:
             self.__solver = SimulatedAnnealingSolver(self)
         if solver_type == SolverType.AC:
             self.__solver = ArcConsistencySolver(self)
-
+        if solver_type == SolverType.FC:
+            self.__solver = ForwardCheckingSolver(self)
 
 
         self.__print_enabled = print
