@@ -4,14 +4,16 @@ import numpy as np
 
 from util import EMPTY_VALUE, Action, grid_to_string
 import time
-from solvers import StupidSolver, BackTrackingSolver, CSPSolver, SimulatedAnnealingSolver, ArcConsistencySolver
+from solvers import StupidSolver, BackTrackingSolver, CSPSolver, SimulatedAnnealingSolver, ArcConsistencySolver, ForwardCheckingSolver
 
 class SolverType:
     STUPID = 'stupid'
     BACKTRACKING = 'backtracking'
-    CSP = 'csp'
-    SA = 'sa'
-    AC = 'ac'
+    CONSTRAINT_SATISFACTION_PROBLEM_HEURISTICS = 'csp'
+    SIMULATED_ANNEALING = 'sa'
+    ARC_CONSISTENCY = 'ac'
+    FORWARD_CHECKING = 'fc'
+
 
 class Sudoku:
 
@@ -23,12 +25,14 @@ class Sudoku:
             self.__solver = StupidSolver(self)
         if solver_type == SolverType.BACKTRACKING:
             self.__solver = BackTrackingSolver(self)
-        if solver_type == SolverType.CSP:
+        if solver_type == SolverType.CONSTRAINT_SATISFACTION_PROBLEM_HEURISTICS:
             self.__solver = CSPSolver(self)
-        if solver_type == SolverType.SA:
+        if solver_type == SolverType.SIMULATED_ANNEALING:
             self.__solver = SimulatedAnnealingSolver(self)
-        if solver_type == SolverType.AC:
+        if solver_type == SolverType.ARC_CONSISTENCY:
             self.__solver = ArcConsistencySolver(self)
+        if solver_type == SolverType.FORWARD_CHECKING:
+            self.__solver = ForwardCheckingSolver(self)
 
 
 
@@ -43,10 +47,9 @@ class Sudoku:
         end = time.time()
 
         total = end - start
-        print(self.__solver_type,"got solution after", total, "seconds", flush=True)
 
         if self.__display_enabled:
-
+            print(self.__solver_type, "got solution after", round(total, 3), "seconds", flush=True)
             action_counter = 0
             quit_game = False
 
@@ -62,17 +65,17 @@ class Sudoku:
 
                 action_counter += 1
         else:
-            action_counter = len(actions_queue) # todo
-            #action_counter = 0 # todo
+            action_counter = len(actions_queue)
             quit_game = not self.__solver.is_solved
 
         if self.__print_enabled:
+            print(self.__solver_type, "got solution after", round(total, 3), "seconds", flush=True)
             print(grid_to_string(self.__solver.grid))
 
-        if not quit_game:
-            print("solved with", action_counter, "action" + ["s", ""][action_counter == 1])
-        else:
-            print("quit after", action_counter, "action" + ["s", ""][action_counter == 1])
+        # if not quit_game:
+        #     print("solved with", action_counter, "action" + ["s", ""][action_counter == 1])
+        # else:
+        #     print("quit after", action_counter, "action" + ["s", ""][action_counter == 1])
 
         return total, action_counter
 

@@ -1,0 +1,20 @@
+10 runs for each solver on each puzzle
+
+
+~~~   easy.txt   ~~~
+    Backtracking time: 0.155 actions: 1134 
+    Arc-Consistency time: 0.198 actions: 144 
+    CSP-Heuristics time: 0.181 actions: 982 
+    Forward-Checking time: 1.452 actions: 918 
+
+~~~   medium.txt   ~~~
+    Backtracking time: 0.469 actions: 3763 
+    Arc-Consistency time: 0.666 actions: 717 
+    CSP-Heuristics time: 0.43 actions: 2419 
+    Forward-Checking time: 3.928 actions: 2351 
+
+~~~   hard.txt   ~~~
+    Backtracking time: 2.132 actions: 15337 
+    Arc-Consistency time: 0.337 actions: 169 
+    CSP-Heuristics time: 2.377 actions: 13495 
+    Forward-Checking time: 17.552 actions: 10839 

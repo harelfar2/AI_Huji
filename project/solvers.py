@@ -1,8 +1,8 @@
 import abc
-from random import randint, shuffle, random, sample
-from util import Action, EMPTY_VALUE, solved_example
+from random import randint, random, sample
+from util import Action, EMPTY_VALUE
 from collections import deque
-from math import exp, ceil
+from math import exp
 import sys
 import numpy as np
 from copy import deepcopy
@@ -218,6 +218,39 @@ class CSPSolver(Solver):
         # todo if one of neigbors gets 0 return -1
 
 
+class ForwardCheckingSolver(Solver):
+    """
+    This solver will look for free spots and put possible values in there.
+    If got stuck, will backtrace and try different value from where got stuck.
+    """
+
+    def solve(self):
+        if self.__recursive_backtracking():
+            self.is_solved = True
+        return self.actions_queue
+
+    def __recursive_backtracking(self, x=0, y=0):
+        """Recursively try to put values in the first free spot, will stop if no empty cells exist."""
+        x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, x, y)
+        if y == -1:
+            return True
+
+        for y1 in range(y, 9):
+            for x1 in range(x, 9):
+                if self.get_value(x1, y1) == EMPTY_VALUE and \
+                        len(self.game.get_legal_values(self.grid, x1, y1)) == 0:
+                    return False
+
+        legal_values = self.game.get_legal_values(self.grid, x, y)
+
+        for value in legal_values:
+            self.insert(x, y, value)
+            if self.__recursive_backtracking(x, y):
+                return True
+            self.delete(x, y)
+        return False
+
+
 class SimulatedAnnealingSolver(Solver):
     def solve(self):
 
@@ -372,7 +405,6 @@ class ArcConsistencySolver(Solver):
             self.is_solved = True
         return self.actions_queue
 
-
     def __recursive_backtracking(self, x=0, y=0):
         x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, x, y)
         if y == -1:
@@ -391,7 +423,6 @@ class ArcConsistencySolver(Solver):
         '''
         create an 9x9 matrix where each entry (x,y) holds the domain of the (x,y) tile
         '''
-
         self.domain_matrix = np.empty((9,9), dtype=object)
 
         for y in range(9):
@@ -438,7 +469,6 @@ class ArcConsistencySolver(Solver):
                 removed = True
 
         return removed
-
 
 
 
