@@ -14,9 +14,9 @@ class Solver(object):
         self.actions_queue = deque()
         self.is_solved = False
         self.game = game
-        self.grid = deepcopy(game.get_grid())
-        self.read_only_tiles = deepcopy(game.get_read_only())
-        self.full_tiles = deepcopy(self.read_only_tiles.copy())
+        self.grid = game.get_grid().copy()
+        self.read_only_tiles = game.get_read_only()
+        self.full_tiles = self.read_only_tiles.copy()
 
     @abc.abstractmethod
     def solve(self):
@@ -49,43 +49,9 @@ class Solver(object):
         self.full_tiles.remove((x, y))
         self.actions_queue.append(Action(x, y))
 
-
-    def quit(self):
-        """ quit action"""
-        self.actions_queue.append(Action(quit=True))
-
-
     def get_value(self, x, y):
         """ get value from coordinate"""
         return self.grid[y][x]
-
-
-class StupidSolver(Solver):
-    """
-    This solver just puts some random (yet legal values) anywhere he can and when if he gets stuck he quits
-    """
-    def solve(self):
-
-        stuck = False
-
-        x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles)
-        while (x, y) is not None:
-            legal_values = self.game.get_legal_values(self.grid, x, y)
-            if len(legal_values) == 0:
-                stuck = True
-                break
-            else:
-                self.insert(x, y, legal_values[randint(0, len(legal_values) - 1)])
-                x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, x, y)
-
-        if stuck:
-            self.quit()
-
-        if self.game.is_complete(self.grid):
-            self.is_solved = True
-            print("OMG COMPLETE")
-
-        return self.actions_queue
 
 
 class BackTrackingSolver(Solver):
@@ -100,8 +66,7 @@ class BackTrackingSolver(Solver):
         return self.actions_queue
 
     def __recursive_backtracking(self, x=0, y=0):
-        """Recursively try to put values in the first free spot, will stop if no empty cells exist."""
-        x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, x, y)
+        x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, y)
         if y == -1:
             return True
 
@@ -116,15 +81,16 @@ class BackTrackingSolver(Solver):
 
 
 class CSPSolver(Solver):
+    """
+    Solves the sudoku with 3 CSP heuristics:
+    Minimum Remaining Values, degree heuristics, least constraining value
+    """
     def solve(self):
         if self.__recursive_csp_backtracking():
             self.is_solved = True
         return self.actions_queue
 
     def __recursive_csp_backtracking(self, x = 0, y= 0):
-        """Solves the sudoku with 3 CSP heuristics:
-        Minimum Remaining Values, degree heuristics, least constraining value
-        """
         x, y = self._get_tile()
         if y == -1 and self.game.is_complete(self.grid):
             return True
@@ -139,7 +105,11 @@ class CSPSolver(Solver):
         return False
 
     def _get_tile(self):
-        """Returns the tile that satisfies Minimum Remaining Values, degree heuristics"""
+
+        """
+        Returns the tile that satisfies Minimum Remaining Values, degree heuristics
+        If no tile found with some legal values it will return -1, -1
+        """
         min_values_count_tiles = []
         min_values_count = np.inf
 
@@ -158,7 +128,6 @@ class CSPSolver(Solver):
                         min_values_count = values_count
                     elif values_count == min_values_count:
                         min_values_count_tiles += [(x, y)] # just add (x,y)
-
 
         if len(min_values_count_tiles) == 0:
             return -1, -1
@@ -187,9 +156,11 @@ class CSPSolver(Solver):
         return min_empty_neighbors_count_tiles[0]
 
     def __get_least_constraining_values(self, x, y):
-        """Return the value that will constrain other tiles the least.
+        """
+        Return the value that will constrain other tiles the least.
         Go through every neighbor the the chosen tile, and check how many possibilities all the neighbor have,
-         and choose the value that gives the neighbors the most possibilities."""
+        and choose the value that gives the neighbors the most possibilities.
+        """
         legal_values = np.ndarray.tolist(self.game.get_legal_values(self.grid, x, y))
 
         legal_values.sort(key=lambda value: -self._neighbor_legal_values_count(x,y, value))
@@ -215,9 +186,6 @@ class CSPSolver(Solver):
         return values_count
 
 
-        # todo if one of neigbors gets 0 return -1
-
-
 class ForwardCheckingSolver(Solver):
     """
     This solver will look for free spots and put possible values in there.
@@ -231,20 +199,31 @@ class ForwardCheckingSolver(Solver):
 
     def __recursive_backtracking(self, x=0, y=0):
         """Recursively try to put values in the first free spot, will stop if no empty cells exist."""
-        x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, x, y)
+        x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, y)
         if y == -1:
             return True
 
-        for y1 in range(y, 9):
-            for x1 in range(x, 9):
-                if self.get_value(x1, y1) == EMPTY_VALUE and \
-                        len(self.game.get_legal_values(self.grid, x1, y1)) == 0:
-                    return False
+        # for y1 in range(y, 9):
+        #     for x1 in range(x, 9):
+        #         if self.get_value(x1, y1) == EMPTY_VALUE and \
+        #                 len(self.game.get_legal_values(self.grid, x1, y1)) == 0:
+        #             return False
 
         legal_values = self.game.get_legal_values(self.grid, x, y)
 
         for value in legal_values:
             self.insert(x, y, value)
+            is_value_possible = True
+            for nx, ny in self.game.get_neighbors(x, y):
+                if self.get_value(nx, ny) == EMPTY_VALUE:
+                    if len(self.game.get_legal_values(self.grid, nx, ny)) == 0:
+                        is_value_possible = False
+                        break
+
+            if not is_value_possible:
+                self.delete(x, y)
+                continue
+
             if self.__recursive_backtracking(x, y):
                 return True
             self.delete(x, y)
@@ -252,71 +231,67 @@ class ForwardCheckingSolver(Solver):
 
 
 class SimulatedAnnealingSolver(Solver):
+    """
+    Simulated Annealing solver.
+    Fills the board randomly by column.
+    while the board isn't solved it switches two tiles from the same column if it benefits him according to a heuristic.
+    Might not switch between them with some probability streaming to zero.
+    If stuck on local maximum for long time (depending on the value of the maximum) it shuffles some random amount of
+    columns and continues
+    """
+
     def solve(self):
+        self.do_simulated_annealing()
+        self.is_solved = True
+        return self.actions_queue
+
+    def do_simulated_annealing(self):
 
         self.random_fill()
 
         curr_score = self.score(self.grid)
 
         temperature = 1
-        iteration_count, escape_count, stuck_count = 0, 0, 0
+        stuck_count = 0
         best_score = curr_score
         switches = 0
 
         while True:
-            iteration_count += 1
-            if iteration_count % 1000 == 0:
-                print("iteration:", iteration_count, "escapes:", escape_count, "switches:", switches,
-                      "score:", curr_score, "temp:", temperature)
-                escape_count = 0
-                switches = 0
+            successor, tile1, tile2 = self.switch_neighbors()
+            successor_score = self.score(successor)
 
-            succ = self.switch_tiles()
-            succ_score = self.score(succ)
-
-            if succ_score == 243:
-                print(self.score(succ))
-                self.grid = succ
-                self.game.set_grid(succ)
+            if successor_score == 243:
+                self.switch_tiles(tile1, tile2)
                 return
 
-            delta = float(succ_score - curr_score)
-
+            delta = float(successor_score - curr_score)
 
             if delta > 0:
-                old_grid = deepcopy(self.grid)
-                self.grid = deepcopy(succ)
+                self.switch_tiles(tile1, tile2)
                 switches += 1
-                curr_score = succ_score
+                curr_score = successor_score
 
                 if exp(min(delta / temperature, 709)) - random() > 0:
-                    self.grid = deepcopy(old_grid)
+                    self.switch_tiles(tile1, tile2)
 
             else:
                 if exp(delta / temperature) - random() > 0:
-                    escape_count += 1
-                    self.grid = deepcopy(succ)
-                    switches += 1
-                    curr_score = succ_score
+                    self.switch_tiles(tile1, tile2)
+                    curr_score = successor_score
 
             if best_score < curr_score:
                 stuck_count = 0
                 best_score = curr_score
             else:
                 stuck_count += 1
-                if stuck_count % (3000 + 5000//(243 - best_score)) == 0: # we've been same or worse then the best score for a long time
-                    print("\nRANDOMIZE!, couldn't pass", best_score, "for", stuck_count, "iterations\n", )
+                if stuck_count > 2000 + 5000//(243 - best_score):  # we've been same score for a long time
 
                     self.randomize()
-                    # todo
-                    # self.delete_progress()
-                    # self.random_fill()
 
                     stuck_count = 0
                     curr_score = self.score(self.grid)
-                    print("score after random:", curr_score)
                     best_score = curr_score
-                    #temperature = 1
+                    temperature = 1
 
             temperature *= .999
 
@@ -325,7 +300,7 @@ class SimulatedAnnealingSolver(Solver):
             possible_values = np.setdiff1d(np.array([value for value in range(1, 10)]),
                                            self.game.get_column(self.grid, x))
             for y in range(9):
-                if self.get_value(x,y) == 0: # or else it is read only and we don't mess with it
+                if self.get_value(x,y) == EMPTY_VALUE: # or else it is read only
                     rand_index = randint(0, len(possible_values) - 1)
                     self.insert(x, y, possible_values[rand_index])
                     possible_values = np.delete(possible_values, rand_index)
@@ -346,15 +321,15 @@ class SimulatedAnnealingSolver(Solver):
         x = randint(0,8)
         y1 = randint(0, 8)
         y2 = randint(0, 8)
-        while y1 != y2 and (x, y1) not in self.read_only_tiles and (x, y2) not in self.read_only_tiles:
+        while y1 == y2 or (x, y1) in self.read_only_tiles or (x, y2) in self.read_only_tiles:
             x = randint(0, 8)
             y1 = randint(0, 8)
             y2 = randint(0, 8)
 
         return (x, y1), (x, y2)
 
-    def switch_tiles(self):
-        next_grid = deepcopy(self.grid.copy())
+    def switch_neighbors(self):
+        next_grid = self.grid.copy()
 
         (x1, y1), (x2, y2) = self.get_random_neighbors()
         value1 = self.get_value(x1, y1)
@@ -363,7 +338,19 @@ class SimulatedAnnealingSolver(Solver):
         next_grid[y1][x1] = value2
         next_grid[y2][x2] = value1
 
-        return next_grid
+        return next_grid, (x1, y1), (x2, y2)
+
+    def switch_tiles(self, t1, t2):
+        x1, y1 = t1
+        x2, y2 = t2
+
+        v1 = self.get_value(x1, y1)
+        v2 = self.get_value(x2, y2)
+
+        self.delete(x1, y1)
+        self.insert(x1, y1, v2)
+        self.delete(x2, y2)
+        self.insert(x2, y2, v1)
 
     def randomize(self):
         columns_to_shuffle = sample(range(0, 9), randint(1, 5))
@@ -383,18 +370,6 @@ class SimulatedAnnealingSolver(Solver):
                     possible_values = np.delete(possible_values, rand_index)
 
 
-
-
-
-
-
-    def delete_progress(self):
-        for y in range(9):
-            for x in range(9):
-                if (x, y) not in self.read_only_tiles:
-                    self.delete(x,y)
-
-
 class ArcConsistencySolver(Solver):
     def solve(self):
         self.create_domains_matrix()
@@ -406,7 +381,7 @@ class ArcConsistencySolver(Solver):
         return self.actions_queue
 
     def __recursive_backtracking(self, x=0, y=0):
-        x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, x, y)
+        x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, y)
         if y == -1:
             return True
 

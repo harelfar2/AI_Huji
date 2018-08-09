@@ -4,37 +4,37 @@ import numpy as np
 
 from util import EMPTY_VALUE, Action, grid_to_string
 import time
-from solvers import StupidSolver, BackTrackingSolver, CSPSolver, SimulatedAnnealingSolver, ArcConsistencySolver, ForwardCheckingSolver
+from solvers import BackTrackingSolver, CSPSolver, SimulatedAnnealingSolver, ArcConsistencySolver, ForwardCheckingSolver
+
 
 class SolverType:
-    STUPID = 'stupid'
-    BACKTRACKING = 'backtracking'
-    CONSTRAINT_SATISFACTION_PROBLEM_HEURISTICS = 'csp'
-    SIMULATED_ANNEALING = 'sa'
-    ARC_CONSISTENCY = 'ac'
-    FORWARD_CHECKING = 'fc'
+    BACKTRACKING = 'Backtracking'
+    CSP = 'CSP heuristics'
+    SIMULATED_ANNEALING = 'Simulated Annealing'
+    ARC_CONSISTENCY = 'Arc-Consistency'
+    FORWARD_CHECKING = 'Forward Checking'
 
 
 class Sudoku:
 
-    def __init__(self, filename, solver_type = 'stupid', display_enabled = False, print = False):
+    def __init__(self, filename, solver_type ='backtracking', display_enabled = False, print = False):
         self.__file_name = filename
         self.__grid, self.__read_only_tiles = self.__parse_file(filename)
         self.__solver_type = solver_type
-        if solver_type == SolverType.STUPID:
-            self.__solver = StupidSolver(self)
+
         if solver_type == SolverType.BACKTRACKING:
             self.__solver = BackTrackingSolver(self)
-        if solver_type == SolverType.CONSTRAINT_SATISFACTION_PROBLEM_HEURISTICS:
+        elif solver_type == SolverType.CSP:
             self.__solver = CSPSolver(self)
-        if solver_type == SolverType.SIMULATED_ANNEALING:
+        elif solver_type == SolverType.SIMULATED_ANNEALING:
             self.__solver = SimulatedAnnealingSolver(self)
-        if solver_type == SolverType.ARC_CONSISTENCY:
+        elif solver_type == SolverType.ARC_CONSISTENCY:
             self.__solver = ArcConsistencySolver(self)
-        if solver_type == SolverType.FORWARD_CHECKING:
+        elif solver_type == SolverType.FORWARD_CHECKING:
             self.__solver = ForwardCheckingSolver(self)
-
-
+        else:
+            # todo error
+            pass
 
         self.__print_enabled = print
         self.__display_enabled = display_enabled
@@ -48,10 +48,19 @@ class Sudoku:
 
         total = end - start
 
+        if not self.is_complete(self.__solver.grid):
+            if actions_queue:
+                action_counter = len(actions_queue)
+            else:
+                action_counter = 0
+            if self.__print_enabled:
+                print("could not find solution. quit after", round(total, 3), "seconds and", action_counter, "actions")
+
+            return total, action_counter
+
         if self.__display_enabled:
             print(self.__solver_type, "got solution after", round(total, 3), "seconds", flush=True)
             action_counter = 0
-            quit_game = False
 
             while actions_queue:
                 action = actions_queue.popleft()
@@ -59,23 +68,14 @@ class Sudoku:
                     self.__insert(action.x, action.y, action.value)
                 elif action.id == Action.DELETE:
                     self.__delete(action.x, action.y)
-                elif action.id == Action.QUIT:
-                    quit_game = True
-                    break
 
                 action_counter += 1
         else:
             action_counter = len(actions_queue)
-            quit_game = not self.__solver.is_solved
 
         if self.__print_enabled:
-            print(self.__solver_type, "got solution after", round(total, 3), "seconds", flush=True)
+            print(self.__solver_type, "got solution after", round(total, 3), "seconds")
             print(grid_to_string(self.__solver.grid))
-
-        # if not quit_game:
-        #     print("solved with", action_counter, "action" + ["s", ""][action_counter == 1])
-        # else:
-        #     print("quit after", action_counter, "action" + ["s", ""][action_counter == 1])
 
         return total, action_counter
 
@@ -134,7 +134,12 @@ class Sudoku:
         return np.delete(block, np.where(block == EMPTY_VALUE))
 
     @staticmethod
-    def get_first_empty_cell(grid, read_only, x_start = 0, y_start = 0):
+    def get_first_empty_cell(grid, read_only, y_start = 0):
+
+        for y in range(y_start, 9):
+            for x in range(0, 9):
+                if grid[y][x] == EMPTY_VALUE and (x, y) not in read_only:
+                    return x, y
 
         for y in range(0, 9):
             for x in range(0, 9):
@@ -210,12 +215,6 @@ class Sudoku:
 
         return True
 
-    def get_grid(self):
-        return self.__grid
-
-    def get_read_only(self):
-        return self.__read_only_tiles
-
     @staticmethod
     def get_block_start_indexes(x, y):
         return x // 3 * 3, y // 3 * 3
@@ -263,8 +262,14 @@ class Sudoku:
 
         return neighbors
 
+    def get_grid(self):
+        return self.__grid
+
+    def get_read_only(self):
+        return self.__read_only_tiles
+
     def set_grid(self, grid):
-        self.__grid = grid
+        self.__grid = grid.copy()
 
     def __str__(self):
         return grid_to_string(self.__grid)
