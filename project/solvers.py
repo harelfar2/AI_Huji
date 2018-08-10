@@ -1,11 +1,10 @@
 import abc
-from random import randint, random, sample
-from util import Action, EMPTY_VALUE
+from random import shuffle, uniform, choice, randint, sample, random
+from util import Action, EMPTY_VALUE, solved_example
 from collections import deque
 from math import exp
 import sys
 import numpy as np
-from copy import deepcopy
 
 
 class Solver(object):
@@ -17,12 +16,10 @@ class Solver(object):
         self.grid = game.get_grid().copy()
         self.read_only_tiles = game.get_read_only()
         self.full_tiles = self.read_only_tiles.copy()
-
     @abc.abstractmethod
     def solve(self):
         """abstract method, each solver will solve in its way."""
         return
-
 
     def insert(self, x, y, value):
         """
@@ -35,7 +32,6 @@ class Solver(object):
         self.grid[y][x] = value
         self.full_tiles += [(x, y)]
         self.actions_queue.append((Action(x, y, value)))
-
 
     def delete(self, x, y):
         """
@@ -86,6 +82,7 @@ class CSPSolver(Solver):
     Minimum Remaining Values, degree heuristics, least constraining value
     """
     def solve(self):
+        self.look = set()
         if self.__recursive_csp_backtracking():
             self.is_solved = True
         return self.actions_queue
@@ -96,20 +93,23 @@ class CSPSolver(Solver):
             return True
         elif y == -1:
             return False
+
         chosen_values = self.__get_least_constraining_values(x, y)
         for value in chosen_values:
             self.insert(x, y, value)
             if self.__recursive_csp_backtracking(x, y):
+
                 return True
             self.delete(x, y)
+
         return False
 
     def _get_tile(self):
-
         """
         Returns the tile that satisfies Minimum Remaining Values, degree heuristics
         If no tile found with some legal values it will return -1, -1
         """
+
         min_values_count_tiles = []
         min_values_count = np.inf
 
@@ -167,8 +167,6 @@ class CSPSolver(Solver):
 
         return legal_values
 
-
-
     def _neighbor_legal_values_count(self, x, y, value):
         """Get the number of possible values for all the neighbor for the given value"""
         values_count = 0
@@ -188,26 +186,19 @@ class CSPSolver(Solver):
 
 class ForwardCheckingSolver(Solver):
     """
-    This solver will look for free spots and put possible values in there.
-    If got stuck, will backtrace and try different value from where got stuck.
+    Same as the backtracking algorithm but after every assignment it checks if one of the tile's neighbor has no legal
+    values, and if so it continues to the next value the tile can hold.
     """
 
     def solve(self):
-        if self.__recursive_backtracking():
+        if self.__recursive_backtracking_with_fc():
             self.is_solved = True
         return self.actions_queue
 
-    def __recursive_backtracking(self, x=0, y=0):
-        """Recursively try to put values in the first free spot, will stop if no empty cells exist."""
+    def __recursive_backtracking_with_fc(self, x=0, y=0):
         x, y = self.game.get_first_empty_cell(self.grid, self.read_only_tiles, y)
         if y == -1:
             return True
-
-        # for y1 in range(y, 9):
-        #     for x1 in range(x, 9):
-        #         if self.get_value(x1, y1) == EMPTY_VALUE and \
-        #                 len(self.game.get_legal_values(self.grid, x1, y1)) == 0:
-        #             return False
 
         legal_values = self.game.get_legal_values(self.grid, x, y)
 
@@ -224,7 +215,7 @@ class ForwardCheckingSolver(Solver):
                 self.delete(x, y)
                 continue
 
-            if self.__recursive_backtracking(x, y):
+            if self.__recursive_backtracking_with_fc(x, y):
                 return True
             self.delete(x, y)
         return False
@@ -241,8 +232,8 @@ class SimulatedAnnealingSolver(Solver):
     """
 
     def solve(self):
-        self.do_simulated_annealing()
-        self.is_solved = True
+        self.MAX_ITERATIONS = 100000
+        self.is_solved = self.do_simulated_annealing()
         return self.actions_queue
 
     def do_simulated_annealing(self):
@@ -251,29 +242,31 @@ class SimulatedAnnealingSolver(Solver):
 
         curr_score = self.score(self.grid)
 
+        if curr_score == 162: # you can never know
+            return True
+
         temperature = 1
         stuck_count = 0
         best_score = curr_score
-        switches = 0
 
-        while True:
+        for i in range(self.MAX_ITERATIONS):
             successor, tile1, tile2 = self.switch_neighbors()
             successor_score = self.score(successor)
 
-            if successor_score == 243:
+            print(curr_score)
+
+            if successor_score == 162:
                 self.switch_tiles(tile1, tile2)
-                return
+                return True
 
             delta = float(successor_score - curr_score)
 
             if delta > 0:
                 self.switch_tiles(tile1, tile2)
-                switches += 1
                 curr_score = successor_score
 
                 if exp(min(delta / temperature, 709)) - random() > 0:
                     self.switch_tiles(tile1, tile2)
-
             else:
                 if exp(delta / temperature) - random() > 0:
                     self.switch_tiles(tile1, tile2)
@@ -283,8 +276,7 @@ class SimulatedAnnealingSolver(Solver):
                 stuck_count = 0
                 best_score = curr_score
             else:
-                stuck_count += 1
-                if stuck_count > 2000 + 5000//(243 - best_score):  # we've been same score for a long time
+                if stuck_count > 2000 + 5000//(162 - best_score):  # we've been same score for a long time
 
                     self.randomize()
 
@@ -295,7 +287,13 @@ class SimulatedAnnealingSolver(Solver):
 
             temperature *= .999
 
+        print("oof")
+        return False
+
     def random_fill(self):
+        """
+        initial random filling for the board where legality only takes place in columns.
+        """
         for x in range(9):
             possible_values = np.setdiff1d(np.array([value for value in range(1, 10)]),
                                            self.game.get_column(self.grid, x))
@@ -306,10 +304,14 @@ class SimulatedAnnealingSolver(Solver):
                     possible_values = np.delete(possible_values, rand_index)
 
     def score(self, grid):
+        """
+        score function for a given board. calculates the number of different values in each column, row and block and
+        sums them.
+        """
         score = 0
         for i in range(9):
             score += len(set(self.game.get_row(grid, i)))
-            score += len(set(self.game.get_column(grid, i)))
+            #score += len(set(self.game.get_column(grid, i)))
 
         for y in [0, 3, 6]:
             for x in [0, 3, 6]:
@@ -318,7 +320,11 @@ class SimulatedAnnealingSolver(Solver):
         return score
 
     def get_random_neighbors(self):
-        x = randint(0,8)
+        """
+        finds two tiles from the same column which are not for read only
+        :return:
+        """
+        x = randint(0, 8)
         y1 = randint(0, 8)
         y2 = randint(0, 8)
         while y1 == y2 or (x, y1) in self.read_only_tiles or (x, y2) in self.read_only_tiles:
@@ -329,6 +335,9 @@ class SimulatedAnnealingSolver(Solver):
         return (x, y1), (x, y2)
 
     def switch_neighbors(self):
+        """
+        finds two random neighbors, switches their values and return the neighbors and the new board.
+        """
         next_grid = self.grid.copy()
 
         (x1, y1), (x2, y2) = self.get_random_neighbors()
@@ -353,6 +362,9 @@ class SimulatedAnnealingSolver(Solver):
         self.insert(x2, y2, v1)
 
     def randomize(self):
+        """
+        selects some columns and shuffles them
+        """
         columns_to_shuffle = sample(range(0, 9), randint(1, 5))
 
         for x in columns_to_shuffle:
@@ -368,6 +380,97 @@ class SimulatedAnnealingSolver(Solver):
                     rand_index = randint(0, len(possible_values) - 1)
                     self.insert(x, y, possible_values[rand_index])
                     possible_values = np.delete(possible_values, rand_index)
+
+'''
+class SimulatedAnnealingSolverAvi(Solver):
+
+    def solve(self):
+        self.is_solved = self.__do_simulated_annealing()
+        return self.actions_queue
+
+    def __do_simulated_annealing(self):
+        self.first_fill()
+
+        temperature = 0.5
+        alpha = 0.999
+        current_score = self.score(self.grid)
+        best_score = current_score
+
+        stuck_counter = 0
+        count = 0
+
+        while True:
+            count += 1
+            if count % 1000 == 0:
+                print(current_score)
+
+            if self.game.is_complete(self.grid):
+                print(self.score(self.grid))
+                return True
+
+            current_score = self.score(self.grid)
+            successor = self.get_successor()
+            successor_score = self.score(successor)
+
+            delta = float(current_score - successor_score)
+            if delta > 0:
+                self.grid = successor.copy()
+            elif delta == 0:
+                if uniform(0, 1) < 0.5:
+                    self.grid = successor.copy()
+            else:
+                if uniform(0, 1) < exp(delta / temperature):
+                    self.grid = successor.copy()
+            temperature = alpha * temperature
+
+            if current_score > best_score:
+                best_score = current_score
+                stuck_counter = 0
+            else:
+                stuck_counter += 1
+                if stuck_counter > 6000:
+                    self.first_fill()
+                    stuck_counter = 0
+
+
+    def first_fill(self):
+        for block_x, block_y in self.game.BLOCK_INDEXES:
+            taken_values = list()
+            for x in range(block_x, block_x + 3):
+                for y in range(block_y, block_y + 3):
+                    if (x, y) in self.read_only_tiles:
+                        taken_values.append(self.get_value(x, y))
+            consistent_block_values = [i for i in range(1, 10) if i not in taken_values]
+            shuffle(consistent_block_values)
+            for x in range(block_x, block_x + 3):
+                for y in range(block_y, block_y + 3):
+                    if (x, y) not in self.read_only_tiles:
+                        self.insert(x, y, consistent_block_values.pop())
+
+    @staticmethod
+    def score(board):
+        score = 0
+        for x in range(9):
+            score -= len(set(board[x]))
+        for y in range(9):
+            score -= len(set([row[y] for row in board]))
+        return score
+
+    def get_successor(self):
+        successor_grid = self.grid.copy()
+        s, t = choice(self.game.BLOCK_INDEXES)
+        block_variables = list()
+        for x in range(s, s + 3):
+            for y in range(t, t + 3):
+                if (x, y) not in self.read_only_tiles:
+                    block_variables.append((x, y))
+        a, b = choice(block_variables)
+        block_variables.remove((a, b))
+        u, v = choice(block_variables)
+        successor_grid[a][b], successor_grid[u][v] = successor_grid[u][v], successor_grid[a][b]
+        return np.array(successor_grid)
+        
+'''
 
 
 class ArcConsistencySolver(Solver):

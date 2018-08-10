@@ -1,0 +1,74 @@
+10 runs for each solver on each puzzle
+
+
+~~~   easy.txt   ~~~
+    Backtracking time: 0.09 actions:1134
+    Arc-Consistency time: 0.089 actions:982
+    CSP heuristics time: 0.106 actions:144
+    Forward Checking time: 0.391 actions:834
+
+~~~   easy2.txt   ~~~
+    Backtracking time: 0.006 actions:73
+    Arc-Consistency time: 0.022 actions:71
+    CSP heuristics time: 0.055 actions:135
+    Forward Checking time: 0.041 actions:51
+
+~~~   easy3.txt   ~~~
+    Backtracking time: 0.008 actions:63
+    Arc-Consistency time: 0.02 actions:47
+    CSP heuristics time: 0.053 actions:135
+    Forward Checking time: 0.041 actions:55
+
+~~~   easy4.txt   ~~~
+    Backtracking time: 1.594 actions:14494
+    Arc-Consistency time: 1.273 actions:14494
+    CSP heuristics time: 0.181 actions:284
+    Forward Checking time: 2.157 actions:4118
+
+~~~   medium.txt   ~~~
+    Backtracking time: 0.281 actions:3763
+    Arc-Consistency time: 0.209 actions:2419
+    CSP heuristics time: 0.411 actions:717
+    Forward Checking time: 0.816 actions:1449
+
+~~~   medium2.txt   ~~~
+    Backtracking time: 0.107 actions:1398
+    Arc-Consistency time: 0.093 actions:924
+    CSP heuristics time: 0.148 actions:150
+    Forward Checking time: 0.393 actions:694
+
+~~~   medium3.txt   ~~~
+    Backtracking time: 0.28 actions:3173
+    Arc-Consistency time: 0.276 actions:3101
+    CSP heuristics time: 0.302 actions:553
+    Forward Checking time: 0.657 actions:1269
+
+~~~   medium4.txt   ~~~
+    Backtracking time: 0.305 actions:3785
+    Arc-Consistency time: 0.373 actions:3785
+    CSP heuristics time: 0.295 actions:359
+    Forward Checking time: 1.012 actions:1909
+
+~~~   hard.txt   ~~~
+    Backtracking time: 0.232 actions:2588
+    Arc-Consistency time: 0.193 actions:1828
+    CSP heuristics time: 0.235 actions:328
+    Forward Checking time: 0.117 actions:154
+
+~~~   hard2.txt   ~~~
+    Backtracking time: 7.693 actions:103363
+    Arc-Consistency time: 9.298 actions:103363
+    CSP heuristics time: 16.048 actions:36155
+    Forward Checking time: 17.829 actions:30619
+
+~~~   evil.txt   ~~~
+    Backtracking time: 2.19 actions:31721
+    Arc-Consistency time: 2.447 actions:31721
+    CSP heuristics time: 18.533 actions:43251
+    Forward Checking time: 4.784 actions:8311
+
+~~~   evil2.txt   ~~~
+    Backtracking time: 1.205 actions:16899
+    Arc-Consistency time: 1.339 actions:16899
+    CSP heuristics time: 3.63 actions:7947
+    Forward Checking time: 0.63 actions:1205

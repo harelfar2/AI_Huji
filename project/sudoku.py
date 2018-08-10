@@ -16,6 +16,7 @@ class SolverType:
 
 
 class Sudoku:
+    BLOCK_INDEXES = [(0, 0), (0, 3), (0, 6), (3, 0), (3, 3), (3, 6), (6, 0), (6, 3), (6, 6)]
 
     def __init__(self, filename, solver_type ='backtracking', display_enabled = False, print = False):
         self.__file_name = filename
@@ -59,7 +60,8 @@ class Sudoku:
             return total, action_counter
 
         if self.__display_enabled:
-            print(self.__solver_type, "got solution after", round(total, 3), "seconds", flush=True)
+            print(self.__solver_type, "got solution after", round(total, 3), "seconds and",
+                  str(len(actions_queue)), "actions", flush=True)
             action_counter = 0
 
             while actions_queue:
@@ -74,7 +76,8 @@ class Sudoku:
             action_counter = len(actions_queue)
 
         if self.__print_enabled:
-            print(self.__solver_type, "got solution after", round(total, 3), "seconds")
+            print(self.__solver_type, "got solution after", round(total, 3), "seconds", "seconds and",
+                  str(len(actions_queue)), "actions", flush=True)
             print(grid_to_string(self.__solver.grid))
 
         return total, action_counter
