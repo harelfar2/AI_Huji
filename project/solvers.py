@@ -82,7 +82,6 @@ class CSPSolver(Solver):
     Minimum Remaining Values, degree heuristics, least constraining value
     """
     def solve(self):
-        self.look = set()
         if self.__recursive_csp_backtracking():
             self.is_solved = True
         return self.actions_queue
@@ -118,8 +117,8 @@ class CSPSolver(Solver):
         '''
         for y in range(0,9):
             for x in range(0,9):
-                if (x,y) not in self.read_only_tiles and\
-                        self.get_value(x,y) == EMPTY_VALUE:
+                if (x, y) not in self.read_only_tiles and\
+                        self.get_value(x, y) == EMPTY_VALUE:
                     values_count = len(self.game.get_legal_values(self.grid, x, y))
                     if values_count == 1: # just one possible value. go for it
                         return x,y
@@ -139,21 +138,22 @@ class CSPSolver(Solver):
         for the tiles from the previous heuristic:
         Degree Heuristic - tiles with least empty neighbors (row, col, block)
         '''
-        min_empty_neighbors_count_tiles = []
-        min_empty_neighbors_count = np.inf
+
+        max_full_neighbors_count_tiles = []
+        max_full_neighbors_count = -np.inf
         for (x, y) in min_values_count_tiles:
             row, col, block = self.game.get_row(self.grid, x), \
                               self.game.get_column(self.grid, y), \
                               self.game.get_block(self.grid, x, y)
 
-            empty_neighbors_count = np.count_nonzero(row) + np.count_nonzero(col) + np.count_nonzero(block)
-            if 0 < empty_neighbors_count < min_empty_neighbors_count:
-                min_empty_neighbors_count_tiles = [(x,y)]
-                min_empty_neighbors_count = empty_neighbors_count
-            elif empty_neighbors_count == min_empty_neighbors_count:
-                min_empty_neighbors_count_tiles += [(x, y)]
+            full_neighbors_count = np.count_nonzero(row) + np.count_nonzero(col) + np.count_nonzero(block)
+            if full_neighbors_count > max_full_neighbors_count:
+                max_full_neighbors_count_tiles = [(x,y)]
+                max_full_neighbors_count = full_neighbors_count
+            elif full_neighbors_count == max_full_neighbors_count:
+                max_full_neighbors_count_tiles += [(x, y)]
 
-        return min_empty_neighbors_count_tiles[0]
+        return max_full_neighbors_count_tiles[0]
 
     def __get_least_constraining_values(self, x, y):
         """
@@ -232,28 +232,22 @@ class SimulatedAnnealingSolver(Solver):
     """
 
     def solve(self):
-        self.MAX_ITERATIONS = 100000
+        self.MAX_ITERATIONS = 30000
         self.is_solved = self.do_simulated_annealing()
         return self.actions_queue
 
     def do_simulated_annealing(self):
-
         self.random_fill()
-
         curr_score = self.score(self.grid)
-
         if curr_score == 162: # you can never know
             return True
 
         temperature = 1
         stuck_count = 0
         best_score = curr_score
-
         for i in range(self.MAX_ITERATIONS):
             successor, tile1, tile2 = self.switch_neighbors()
             successor_score = self.score(successor)
-
-            print(curr_score)
 
             if successor_score == 162:
                 self.switch_tiles(tile1, tile2)
@@ -276,18 +270,15 @@ class SimulatedAnnealingSolver(Solver):
                 stuck_count = 0
                 best_score = curr_score
             else:
-                if stuck_count > 2000 + 5000//(162 - best_score):  # we've been same score for a long time
+                if stuck_count > 2000 + 3000//(162 - best_score):  # we've been same score for a long time
 
                     self.randomize()
 
                     stuck_count = 0
                     curr_score = self.score(self.grid)
                     best_score = curr_score
-                    temperature = 1
 
             temperature *= .999
-
-        print("oof")
         return False
 
     def random_fill(self):
@@ -365,7 +356,7 @@ class SimulatedAnnealingSolver(Solver):
         """
         selects some columns and shuffles them
         """
-        columns_to_shuffle = sample(range(0, 9), randint(1, 5))
+        columns_to_shuffle = sample(range(0, 9), randint(1, 9))
 
         for x in columns_to_shuffle:
             for y in range(0, 9):
@@ -380,97 +371,6 @@ class SimulatedAnnealingSolver(Solver):
                     rand_index = randint(0, len(possible_values) - 1)
                     self.insert(x, y, possible_values[rand_index])
                     possible_values = np.delete(possible_values, rand_index)
-
-'''
-class SimulatedAnnealingSolverAvi(Solver):
-
-    def solve(self):
-        self.is_solved = self.__do_simulated_annealing()
-        return self.actions_queue
-
-    def __do_simulated_annealing(self):
-        self.first_fill()
-
-        temperature = 0.5
-        alpha = 0.999
-        current_score = self.score(self.grid)
-        best_score = current_score
-
-        stuck_counter = 0
-        count = 0
-
-        while True:
-            count += 1
-            if count % 1000 == 0:
-                print(current_score)
-
-            if self.game.is_complete(self.grid):
-                print(self.score(self.grid))
-                return True
-
-            current_score = self.score(self.grid)
-            successor = self.get_successor()
-            successor_score = self.score(successor)
-
-            delta = float(current_score - successor_score)
-            if delta > 0:
-                self.grid = successor.copy()
-            elif delta == 0:
-                if uniform(0, 1) < 0.5:
-                    self.grid = successor.copy()
-            else:
-                if uniform(0, 1) < exp(delta / temperature):
-                    self.grid = successor.copy()
-            temperature = alpha * temperature
-
-            if current_score > best_score:
-                best_score = current_score
-                stuck_counter = 0
-            else:
-                stuck_counter += 1
-                if stuck_counter > 6000:
-                    self.first_fill()
-                    stuck_counter = 0
-
-
-    def first_fill(self):
-        for block_x, block_y in self.game.BLOCK_INDEXES:
-            taken_values = list()
-            for x in range(block_x, block_x + 3):
-                for y in range(block_y, block_y + 3):
-                    if (x, y) in self.read_only_tiles:
-                        taken_values.append(self.get_value(x, y))
-            consistent_block_values = [i for i in range(1, 10) if i not in taken_values]
-            shuffle(consistent_block_values)
-            for x in range(block_x, block_x + 3):
-                for y in range(block_y, block_y + 3):
-                    if (x, y) not in self.read_only_tiles:
-                        self.insert(x, y, consistent_block_values.pop())
-
-    @staticmethod
-    def score(board):
-        score = 0
-        for x in range(9):
-            score -= len(set(board[x]))
-        for y in range(9):
-            score -= len(set([row[y] for row in board]))
-        return score
-
-    def get_successor(self):
-        successor_grid = self.grid.copy()
-        s, t = choice(self.game.BLOCK_INDEXES)
-        block_variables = list()
-        for x in range(s, s + 3):
-            for y in range(t, t + 3):
-                if (x, y) not in self.read_only_tiles:
-                    block_variables.append((x, y))
-        a, b = choice(block_variables)
-        block_variables.remove((a, b))
-        u, v = choice(block_variables)
-        successor_grid[a][b], successor_grid[u][v] = successor_grid[u][v], successor_grid[a][b]
-        return np.array(successor_grid)
-        
-'''
 
 
 class ArcConsistencySolver(Solver):

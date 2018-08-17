@@ -49,7 +49,7 @@ class Sudoku:
 
         total = end - start
 
-        if not self.is_complete(self.__solver.grid):
+        if not self.__solver.is_solved or not self.is_complete(self.__solver.grid):
             if actions_queue:
                 action_counter = len(actions_queue)
             else:
@@ -57,7 +57,7 @@ class Sudoku:
             if self.__print_enabled:
                 print("could not find solution. quit after", round(total, 3), "seconds and", action_counter, "actions")
 
-            return total, action_counter
+            return total, action_counter, False
 
         if self.__display_enabled:
             print(self.__solver_type, "got solution after", round(total, 3), "seconds and",
@@ -72,6 +72,8 @@ class Sudoku:
                     self.__delete(action.x, action.y)
 
                 action_counter += 1
+
+            time.sleep(10)
         else:
             action_counter = len(actions_queue)
 
@@ -80,7 +82,7 @@ class Sudoku:
                   str(len(actions_queue)), "actions", flush=True)
             print(grid_to_string(self.__solver.grid))
 
-        return total, action_counter
+        return total, action_counter, True
 
     def __insert(self, x, y, value):
         """
@@ -99,19 +101,19 @@ class Sudoku:
             self.__board.insert(y, x, EMPTY_VALUE)
 
     @staticmethod
-    def get_row(grid, x):
+    def get_row(grid, y):
         """
         returns a list representing the row of tile (x,y) in the grid
         """
-        row = grid[x, :]
+        row = grid[y, :]
         return np.delete(row, np.where(row == EMPTY_VALUE))
 
     @staticmethod
-    def get_column(grid, y):
+    def get_column(grid, x):
         """
         returns a list representing the column of tile (x,y) in the grid
         """
-        col = grid[:, y]
+        col = grid[:, x]
         return np.delete(col, np.where(col == EMPTY_VALUE))
 
     @staticmethod
