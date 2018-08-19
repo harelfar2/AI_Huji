@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+    
+    <!-- you may want to add your own keywords here, for search engine optimization -->
+    <meta name="Keywords" content="INTRODUCTION TO ARTIFICIAL INTELLIGENCE, computer science, the hebrew university of jerusalem, project"/ >
+    <link rel="stylesheet" type="text/css" href="http://www.cs.huji.ac.il/~ai/projects/2012/css/default.css" />      <!-- Don't change this line!-->
+    <title>SUDOKU</title>
+</head>
+
+<body>
+<div class="main">
+    <div class="gfx">
+        <a href="http://www.cs.huji.ac.il/~ai/projects/" alt="Introduction to Artificial Intelligence The Hebrew University of Jerusalem"></a>  <!-- Don't change this line!--> 
+    </div>
+    <div class="title">
+        <h1>SUDOKU </h1>
+        <h4>Final project by </h4>
+        <h3>
+            <a href="mailto:email1@cs.huji.ac.il" > Avi Korzak  </a> &nbsp &nbsp
+            <a href="mailto:email2@cs.huji.ac.il" > Jonathan Meerson  </a> &nbsp &nbsp
+			<a href="mailto:email3@cs.huji.ac.il" > Harel Farkash  </a> &nbsp &nbsp
+        </h3>     
+    </div>
+   <hr>
+
+    <div class="content">
+    <h2><center>Introduction</center></h2>
+    <p>
+    Sudoku, originally called Number Place) is a logic-based, combinatorial number-placement puzzle. The objective is to fill a 9×9 grid with digits so that each column, each row, and each of the nine 3×3 subgrids that compose the grid (also called "boxes", "blocks", or "regions") contains all of the digits from 1 to 9. The puzzle setter provides a partially completed grid, which for a well-posed puzzle has a single solution. (Wikipedia)
+    
+    
+    </p>
+    <img src="img/sudoku.jpg" alt="funny chart" width="620" >
+    
+    <h2><center> Approach and Method</center> </h2>
+    <br>
+Sudoku can be viewed as a search problem but since it has a big branching scale, it might be inefficient to solve it using uninformed search algorithms.
+The main purpose of this paper is to find whether using CSP heuristics and techniques like Forward-Checking and Arc-Consistency are better in terms of efficiency and running time than basic uninformed search algorithms, like backtracking. 
+
+We've formulated the Sudoku Game as a Constraint-Satisfaction problem as follows:
+Variables: X = All the tiles on the board.
+Domains: D ={{1,2,...,9}81}
+Constraints: C= Each value is assigned exactly once in each row, column and in a 3x3 block.
+
+We also defined the Neighbors of a given tile with all the tiles which are in its 3x3 block, its row and its column. 
+
+In Addition, after reading some papers about stochastic approaches to solving Sudoku, we wanted to check whether probabilistic algorithms like Simulated Annealing can solve it quickly.
+        <br><br>
+<h3>Algorithms that we used:</h3>
+        <ul>
+  <li>Simple backtracking</li>
+  <li>Constraint Satisfaction Problem Heuristics - Minimum Remaining Values, degree Heuristic and Least Constraining value</li>
+  <li>Arc Consistency</li>
+  <li>Forward Checking</li>
+  <li>Simulated Annealing</li>
+        </ul>
+
+    </p>
+       
+	<center><h2> Results </h2></center>
+    <p>
+These are the results of each of our CSP algorithms compared to the Backtracking algorithms in terms of number of actions performed and running time, after running each one 100 times on 3 different puzzles:
+
+<img src="img/Capture.PNG" alt="funny chart" width="620" > 
+
+
+Besides CSP heuristics and techniques, we wanted to see if Simulated Annealing was a good algorithm for solving Sudoku. We ran it on each puzzle for 100 times for 30,000 iterations each, and calculated the percentage of successes (meaning the algorithm could in fact solve it under 30,000 iterations), and the average time of the successful attempts. 
+The results:
+
+    </p>
+   
+    <img src="img/SA.PNG" alt="funny chart" width="620" > 
+
+    <!--
+    ***
+    note that the page width is 620px, so limit your images width to 620!
+    ***
+    -->    
+         
+    <center><h2>Conclusions</h2></center>
+    <p>
+    The main goal of this paper was to compare the CSP heuristics and techniques to the simple backtracking algorithm.
+        <br>The algorithm which used CSP heuristics (MRV, degree and LCV) had somewhat good results in the running time
+        aspect and excellent results in number of actions aspect.
+        <br>The Arc-Consistency algorithm didn?t perform well at all. The reason for this is the fact that a value is
+        removed from the domain of a tile if and only if it appears in the domain of its neighbor which is a strong
+        condition given the board is usually only very partially filled in the beginning.
+        <br>The Forward-Checking algorithm did poorly on most of the puzzles. Due to its heavy computation (at each
+        assignment check all  the empty neighbors for a tile with no possible legal values) it wasted a lot of time in
+        comparison to how many actions it saved when comparing to the regular backtracking algorithm.
+        <br>Our conclusion from the results is that using the uninformed backtracking algorithm is a good method. It performed well on the boards from the newspaper and could have been improved with shuffling the possible values for the ?hard for backtracking board? which was specifically designed to fail him with big values on the first tiles.
+In addition, the Forward-Checking and the Arc-Consistency algorithms are not very reliable: Arc mostly doesn?t make significant changes in the domains and wastes time on trying to reducing their sizes. The forward checking algorithm is not effective in a small search space where checking violations is wasting more time than encountering mistakes on the run itself.
+The CSP heuristic are a great way to reduce the number of actions but the computation time make the running time usually worse than the backtracking algorithm.
+<br>The second goal of this project was to figure out whether Simulated Annealing was a good method for solving Sudoku.
+Our conclusion from the results is that it's definitely not: Although the running times of the successful attempts were quite low, the actual success were rare most of the times - only 3% successes for the hard puzzle.
+
+
+    </p>
+   
+    <center><h2>Additional Information</h2></center>
+    <p>
+        <ul>
+            <li><a href="files/AIProjectSummery.pdf"> Link to the report (English)</a></li>
+             <li><a href="https://en.wikipedia.org/wiki/Sudoku"> Sudoku page in Wikipedia</a></li>
+
+        </ul>
+   </p>
+
+   <center><h2>References</h2></center>
+   <p>
+   List any references from the literature you have consulted or used. 
+   </p>   
+   </div>
+   
+    <!-- *Don't* delete the below code, copyright issues...  -->    
+    <div class="footer">		
+        <span class="right"><a href="http://templates.arcsin.se/">Website template</a> by <a href="http://arcsin.se/">Arcsin</a>   </span>
+   </div>
+</div>
+</body>
+</html>
