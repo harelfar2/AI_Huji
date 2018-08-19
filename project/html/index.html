@@ -61,9 +61,16 @@ In Addition, after reading some papers about stochastic approaches to solving Su
        
 	<center><h2> Results </h2></center>
     <p>
-These are the results of each of our CSP algorithms compared to the Backtracking algorithms in terms of number of actions performed and running time, after running each one 100 times on 3 different puzzles:
-
-<img src="img/Capture.PNG" alt="funny chart" width="620" > 
+These are the results of each of our CSP algorithms compared to the Backtracking algorithms in terms of number of
+        actions performed and running time, after running each one 100 times on 3 different puzzles:
+        <br>(the results are for easy, medium, hard, and backtracking-hard puzzles)
+<br>The backtracking-hard puzzle is special and hard for backtracking because when iterating from left to right, top to bottom, the first
+        cells contain very big values, so a backtracking algorithm that iterate over values from the smallest to
+        largest (like ours), makes many mistakes before reaching the right solution.
+<img src="img/easy.PNG" alt="funny chart" width="620" >
+<img src="img/med.PNG" alt="funny chart" width="620" >
+<img src="img/hard.PNG" alt="funny chart" width="620" >
+<img src="img/bt-hard.PNG" alt="funny chart" width="620" >
 
 
 Besides CSP heuristics and techniques, we wanted to see if Simulated Annealing was a good algorithm for solving Sudoku. We ran it on each puzzle for 100 times for 30,000 iterations each, and calculated the percentage of successes (meaning the algorithm could in fact solve it under 30,000 iterations), and the average time of the successful attempts. 
