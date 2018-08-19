@@ -18,9 +18,9 @@
         <h1>SUDOKU </h1>
         <h4>Final project by </h4>
         <h3>
-            <a href="mailto:email1@cs.huji.ac.il" > Avi Korzak  </a> &nbsp &nbsp
-            <a href="mailto:email2@cs.huji.ac.il" > Jonathan Meerson  </a> &nbsp &nbsp
-			<a href="mailto:email3@cs.huji.ac.il" > Harel Farkash  </a> &nbsp &nbsp
+            <a href="harel.farkash@mail.huji.ac.il" > Harel Farkash  </a> &nbsp &nbsp
+            <a href="jonathan.meerson@mail.huji.ac.il" > Jonathan Meerson  </a> &nbsp &nbsp
+			<a href="avi.korzac@mail.huji.ac.il" > Avi Korzac  </a> &nbsp &nbsp
         </h3>     
     </div>
    <hr>
@@ -38,13 +38,13 @@
     <br>
 Sudoku can be viewed as a search problem but since it has a big branching scale, it might be inefficient to solve it using uninformed search algorithms.
 The main purpose of this paper is to find whether using CSP heuristics and techniques like Forward-Checking and Arc-Consistency are better in terms of efficiency and running time than basic uninformed search algorithms, like backtracking. 
+<br>
+We've formulated the Sudoku Game as a Constraint-Satisfaction problem as follows:<br>
+Variables: X = All the tiles on the board.<br>
+Domains: D ={{1,2,...,9}^81}<br>
+Constraints: C= Each value is assigned exactly once in each row, column and in a 3x3 block.<br>
 
-We've formulated the Sudoku Game as a Constraint-Satisfaction problem as follows:
-Variables: X = All the tiles on the board.
-Domains: D ={{1,2,...,9}81}
-Constraints: C= Each value is assigned exactly once in each row, column and in a 3x3 block.
-
-We also defined the Neighbors of a given tile with all the tiles which are in its 3x3 block, its row and its column. 
+We also defined the Neighbors of a given tile with all the tiles which are in its 3x3 block, its row and its column. <br>
 
 In Addition, after reading some papers about stochastic approaches to solving Sudoku, we wanted to check whether probabilistic algorithms like Simulated Annealing can solve it quickly.
         <br><br>
