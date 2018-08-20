@@ -1,9 +1,10 @@
-from sudoku import Sudoku
+from sudoku import Sudoku, SolverType
 import sys
 
 
 def print_explanation_and_terminate():
-    print("USAGE: <board-path> solver=<stupid|backtracking|csp> display=<true|false> print=<true|false>")
+    print("USAGE: <board-path> solver=<backtracking|csp|arc|forward_checking|simulated_annealing> "
+          "display=<true|false> print=<true|false>")
     print("example: puzzles/backtracking_hard.txt csp true false")
     exit(-1)
 
@@ -20,10 +21,19 @@ if __name__ == '__main__':
         print(os_error)
         print_explanation_and_terminate()
 
-    SOLVER_TYPES = ["stupid", "backtracking", "csp", "sa", "ac", "fc"]
-    solver_type = args[2]
-    if solver_type not in SOLVER_TYPES:
+    SOLVER_TYPES = {"backtracking": SolverType.BACKTRACKING,
+                    "csp": SolverType.CSP,
+                    "arc": SolverType.ARC_CONSISTENCY,
+                    "forward_checking": SolverType.FORWARD_CHECKING,
+                    "simulated_annealing": SolverType.SIMULATED_ANNEALING}
+
+
+    try:
+        solver_type = SOLVER_TYPES[args[2]]
+    except Exception as e:
         print_explanation_and_terminate()
+
+
 
     TRUE_AND_FALSE = ["true", "false"]
     if args[3] not in TRUE_AND_FALSE or args[4] not in TRUE_AND_FALSE:

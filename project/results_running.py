@@ -13,10 +13,7 @@ def deterministic_algorithms_on_paper_puzzles(runs):
           "*******************************************")
     with open('results.txt', 'a') as results_file:
 
-        paper_puzzles = ["easy.txt", "easy2.txt", "easy3.txt", "easy4.txt",
-                         "medium.txt", "medium2.txt", "medium3.txt", "medium4.txt",
-                         "hard.txt", "hard2.txt",
-                         "evil.txt", "evil2.txt"]
+        paper_puzzles = ["easy.txt", "medium.txt", "hard.txt", "backtracking_hard.txt"]
 
         results_file.write(str(runs) + " runs for each deterministic solver on each puzzle\n\n")
         results_file.flush()
